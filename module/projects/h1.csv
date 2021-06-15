@@ -1,0 +1,2 @@
+key,fpath,database,begin,end,t_input_start,timestep_input,timestep_simulation,timestep_output,aggregation_output,withHydro,write_summary,substance,simulation,preprocessing,postprocessing,MASS_SW,MASS_SED,MASS_SED_DEEP,PEC_SW,PEC_SED,threshold_sw,threshold_sed
+h1,c:/_STEPSRivernetwork_v092/projects/,h5,2007-01-01T01:00,2016-12-31T23:00,2007-01-01T01:00,1H,1Min,1H,max,TRUE,FALSE,CMP_A,TRUE,FALSE,FALSE,TRUE,TRUE,TRUE,TRUE,TRUE,0.001,0.1
