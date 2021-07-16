@@ -363,7 +363,7 @@ class StepsRivernetwork(base.Component):
                 self.outputs[variable[0]].set_values(
                     np.ndarray,
                     shape=data.shape,
-                    dtype=np.float,
+                    data_type=np.float,
                     chunks=(min(262144, data.shape[0]), 1),
                     scales="time/hour, space/base_geometry",
                     unit=variable[1]
