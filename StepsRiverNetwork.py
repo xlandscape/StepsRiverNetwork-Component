@@ -1,5 +1,5 @@
 """
-Component for the Steps efate module.
+Component for the Steps environmental fate module.
 """
 import datetime
 import h5py
@@ -11,12 +11,13 @@ import base
 import attrib
 
 
-class StepsRivernetwork(base.Component):
+class StepsRiverNetwork(base.Component):
     """
-    The component encapsulating the Steps efate module.
+    The component encapsulating the Steps environmental fate module.
     """
     # RELEASES
     VERSION = base.VersionCollection(
+        base.VersionInfo("2.0.2", "2021-07-19"),
         base.VersionInfo("2.0.1", "2020-12-03"),
         base.VersionInfo("2.0.0", "2020-10-22"),
         base.VersionInfo("1.3.35", "2020-08-12"),
@@ -38,29 +39,48 @@ class StepsRivernetwork(base.Component):
     )
 
     # CHANGELOG
-    VERSION.added("1.2.3", "components.StepsRivernetwork component")
-    VERSION.added("1.2.4", "components.CmfHydrology hydrology Python library only loaded when needed")
-    VERSION.changed("1.2.36", "components.CmfHydrology replaced by components.StepsRiverNetwork")
-    VERSION.changed("1.2.37", "components.StepsRiverNetwork module updated to version 0.9.2")
-    VERSION.changed("1.2.37", "components.StepsRiverNetwork thresholds as inputs")
-    VERSION.fixed("1.3.3", "increased numeric precision in components.StepsRivernetwork (preliminary)")
-    VERSION.changed("1.3.7", "components.StepsRiverNetwork module updated to version 0.9.3")
-    VERSION.fixed("1.3.10", "Spatial referencing in components.StepsRiverNetwork")
-    VERSION.changed("1.3.16", "Substance parameterization in components.StepsRiverNetwork changed")
-    VERSION.changed("1.3.24", "components.StepsRiverNetwork uses base function to call module")
-    VERSION.fixed("1.3.26", "components.StepsRiverNetwork reach order")
-    VERSION.changed("1.3.27", "components.StepsRiverNetwork specifies scales")
-    VERSION.fixed("1.3.29", "Input slicing in components.StepsRiverNetwork")
-    VERSION.changed("1.3.33", "components.StepsRiverNetwork checks input types strictly")
-    VERSION.changed("1.3.33", "components.StepsRiverNetwork checks for physical units")
-    VERSION.changed("1.3.33", "components.StepsRiverNetwork reports physical units to the data store")
-    VERSION.changed("1.3.33", "components.StepsRiverNetwork checks for scales")
-    VERSION.changed("1.3.35", "components.StepsRiverNetwork receives processing path as home path environment variable")
+    # noinspection SpellCheckingInspection
+    VERSION.added("1.2.3", "`components.StepsRivernetwork` component")
+    VERSION.added("1.2.4", "`components.CmfHydrology` hydrology Python library only loaded when needed")
+    VERSION.changed("1.2.36", "`components.CmfHydrology` replaced by `components.StepsRiverNetwork` ")
+    # noinspection SpellCheckingInspection
+    VERSION.changed("1.2.37", "`components.StepsRivernetwork` module updated to version 0.9.2")
+    # noinspection SpellCheckingInspection
+    VERSION.changed("1.2.37", "`components.StepsRivernetwork` thresholds as inputs")
+    # noinspection SpellCheckingInspection
+    VERSION.fixed("1.3.3", "increased numeric precision in `components.StepsRivernetwork` (preliminary)")
+    # noinspection SpellCheckingInspection
+    VERSION.changed("1.3.7", "`components.StepsRivernetwork` module updated to version 0.9.3")
+    # noinspection SpellCheckingInspection
+    VERSION.fixed("1.3.10", "Spatial referencing in `components.StepsRivernetwork`")
+    # noinspection SpellCheckingInspection
+    VERSION.changed("1.3.16", "Substance parameterization in `components.StepsRivernetwork` changed")
+    # noinspection SpellCheckingInspection
+    VERSION.changed("1.3.24", "components.StepsRivernetwork uses base function to call module")
+    # noinspection SpellCheckingInspection
+    VERSION.fixed("1.3.26", "`components.StepsRivernetwork` reach order")
+    # noinspection SpellCheckingInspection
+    VERSION.changed("1.3.27", "`components.StepsRivernetwork` specifies scales")
+    # noinspection SpellCheckingInspection
+    VERSION.fixed("1.3.29", "Input slicing in `components.StepsRivernetwork`")
+    # noinspection SpellCheckingInspection
+    VERSION.changed("1.3.33", "`components.StepsRivernetwork` checks input types strictly")
+    # noinspection SpellCheckingInspection
+    VERSION.changed("1.3.33", "`components.StepsRivernetwork` checks for physical units")
+    # noinspection SpellCheckingInspection
+    VERSION.changed("1.3.33", "`components.StepsRivernetwork` reports physical units to the data store")
+    # noinspection SpellCheckingInspection
+    VERSION.changed("1.3.33", "`components.StepsRivernetwork` checks for scales")
+    # noinspection SpellCheckingInspection
+    VERSION.changed(
+        "1.3.35", "`components.StepsRivernetwork` receives processing path as home path environment variable")
     VERSION.changed("2.0.0", "First independent release")
     VERSION.added("2.0.1", "Changelog and release history")
+    VERSION.changed("2.0.2", "Spellings")
+    VERSION.changed("2.0.2", "Changelog uses markdown")
 
     def __init__(self, name, observer, store):
-        super(StepsRivernetwork, self).__init__(name, observer, store)
+        super(StepsRiverNetwork, self).__init__(name, observer, store)
         self._module = base.Module("River network version of STEPS1234", "0.93")
         # noinspection SpellCheckingInspection
         self._inputs = base.InputContainer(self, [
@@ -89,7 +109,7 @@ class StepsRivernetwork(base.Component):
                 self.default_observer
             ),
             base.Input(
-                "TimeseriesStart",
+                "TimeSeriesStart",
                 (attrib.Class(datetime.datetime, 1), attrib.Unit(None, 1), attrib.Scales("global", 1)),
                 self.default_observer
             ),
@@ -137,7 +157,7 @@ class StepsRivernetwork(base.Component):
             base.Input("Temp0", (attrib.Class(float, 1), attrib.Unit("°C", 1)), self.default_observer),
             base.Input("Q10", (attrib.Class(float, 1), attrib.Unit("1", 1)), self.default_observer),
             base.Input("PlantUptake", (attrib.Class(float, 1), attrib.Unit("1", 1)), self.default_observer),
-            base.Input("QFAC", (attrib.Class(float, 1), attrib.Unit("1", 1)), self.default_observer),
+            base.Input("QFac", (attrib.Class(float, 1), attrib.Unit("1", 1)), self.default_observer),
             base.Input(
                 "ThresholdSW",
                 (attrib.Class(float, 1), attrib.Unit("mg/m³", 1)),
@@ -230,7 +250,7 @@ class StepsRivernetwork(base.Component):
         """
         hydrography = self.inputs["Hydrography"].read().values
         reaches_hydrology = self.inputs["ReachesHydrology"].read().values
-        self._begin = self.inputs["TimeseriesStart"].read().values
+        self._begin = self.inputs["TimeSeriesStart"].read().values
         number_time_steps = self.inputs["WaterDischarge"].describe()["shape"][0]
         reaches_drift = self.inputs["ReachesDrift"].read().values
         driver = ogr.GetDriverByName("ESRI Shapefile")
@@ -341,7 +361,7 @@ class StepsRivernetwork(base.Component):
                 self.inputs["Temp0"].read().values,
                 self.inputs["Q10"].read().values,
                 self.inputs["PlantUptake"].read().values,
-                self.inputs["QFAC"].read().values
+                self.inputs["QFac"].read().values
             ))
         return
 
@@ -363,7 +383,7 @@ class StepsRivernetwork(base.Component):
                 self.outputs[variable[0]].set_values(
                     np.ndarray,
                     shape=data.shape,
-                    dtype=np.float,
+                    data_type=np.float,
                     chunks=(min(262144, data.shape[0]), 1),
                     scales="time/hour, space/base_geometry",
                     unit=variable[1]

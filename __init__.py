@@ -1,5 +1,5 @@
 """
-Imports for the Landscape Model StepsRivernetwork component.
+Imports for the Landscape Model StepsRiverNetwork component.
 """
 
-from .StepsRivernetwork import *
+from .StepsRiverNetwork import *
