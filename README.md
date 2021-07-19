@@ -1,2 +1,2 @@
-# StepsRivernetwork-Component
+# StepsRiverNetwork-Component
 
