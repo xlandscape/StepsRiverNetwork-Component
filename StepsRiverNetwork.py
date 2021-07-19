@@ -17,6 +17,7 @@ class StepsRiverNetwork(base.Component):
     """
     # RELEASES
     VERSION = base.VersionCollection(
+        base.VersionInfo("2.0.2", "2021-07-19"),
         base.VersionInfo("2.0.1", "2020-12-03"),
         base.VersionInfo("2.0.0", "2020-10-22"),
         base.VersionInfo("1.3.35", "2020-08-12"),
@@ -75,6 +76,8 @@ class StepsRiverNetwork(base.Component):
         "1.3.35", "`components.StepsRivernetwork` receives processing path as home path environment variable")
     VERSION.changed("2.0.0", "First independent release")
     VERSION.added("2.0.1", "Changelog and release history")
+    VERSION.changed("2.0.2", "Spellings")
+    VERSION.changed("2.0.2", "Changelog uses markdown")
 
     def __init__(self, name, observer, store):
         super(StepsRiverNetwork, self).__init__(name, observer, store)
