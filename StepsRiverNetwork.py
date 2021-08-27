@@ -17,6 +17,7 @@ class StepsRiverNetwork(base.Component):
     """
     # RELEASES
     VERSION = base.VersionCollection(
+        base.VersionInfo("2.0.3", "2021-08-27"),
         base.VersionInfo("2.0.2", "2021-07-19"),
         base.VersionInfo("2.0.1", "2020-12-03"),
         base.VersionInfo("2.0.0", "2020-10-22"),
@@ -38,6 +39,25 @@ class StepsRiverNetwork(base.Component):
         base.VersionInfo("1.1.1", None)
     )
 
+    # AUTHORS
+    VERSION.authors.extend((
+        "Sascha Bub (component) - sascha.bub@gmx.de",
+        "Thorsten Schad (component) - thorsten.schad@bayer.com",
+        "Sebastian Multsch (module) - smultsch@knoell.com"
+    ))
+
+    # ACKNOWLEDGEMENTS
+    VERSION.acknowledgements.extend((
+        "[GDAL](https://pypi.org/project/GDAL)",
+        "[h5py](https://www.h5py.org)",
+        "[NumPy](https://numpy.org)"
+    ))
+
+    # ROADMAP
+    VERSION.roadmap.extend((
+        "z-value precision ([#1](https://gitlab.bayer.com/aqrisk-landscape/stepsrivernetwork-component/-/issues/1))",
+    ))
+
     # CHANGELOG
     # noinspection SpellCheckingInspection
     VERSION.added("1.2.3", "`components.StepsRivernetwork` component")
@@ -56,7 +76,7 @@ class StepsRiverNetwork(base.Component):
     # noinspection SpellCheckingInspection
     VERSION.changed("1.3.16", "Substance parameterization in `components.StepsRivernetwork` changed")
     # noinspection SpellCheckingInspection
-    VERSION.changed("1.3.24", "components.StepsRivernetwork uses base function to call module")
+    VERSION.changed("1.3.24", "`components.StepsRivernetwork` uses base function to call module")
     # noinspection SpellCheckingInspection
     VERSION.fixed("1.3.26", "`components.StepsRivernetwork` reach order")
     # noinspection SpellCheckingInspection
@@ -78,26 +98,37 @@ class StepsRiverNetwork(base.Component):
     VERSION.added("2.0.1", "Changelog and release history")
     VERSION.changed("2.0.2", "Spellings")
     VERSION.changed("2.0.2", "Changelog uses markdown")
+    VERSION.added("2.0.3", "Base documentation")
 
     def __init__(self, name, observer, store):
         super(StepsRiverNetwork, self).__init__(name, observer, store)
-        self._module = base.Module("River network version of STEPS1234", "0.93")
+        self._module = base.Module(
+            "River network version of STEPS1234", "0.93", r"module\documentation\html\index.html")
         # noinspection SpellCheckingInspection
         self._inputs = base.InputContainer(self, [
             base.Input(
                 "ProcessingPath",
                 (attrib.Class(str, 1), attrib.Unit(None, 1), attrib.Scales("global", 1)),
-                self.default_observer
+                self.default_observer,
+                description="""The working directory for the module. It is used for all files prepared as module inputs
+                or generated as (temporary) module outputs."""
             ),
             base.Input(
                 "Hydrography",
                 (attrib.Class(str, 1), attrib.Unit(None, 1), attrib.Scales("global", 1)),
-                self.default_observer
+                self.default_observer,
+                description="""The spatial delineation of the hydrographic features in the simulated landscape. This
+                input basically represents the flow-lines used during preparation of the hydrology. The hydrography is
+                consistently for all components of the Landscape Model subdivided into individual segments (*reaches*).
+                """
             ),
             base.Input(
                 "Catchment",
                 (attrib.Class(str, 1), attrib.Unit(None, 1), attrib.Scales("global", 1)),
-                self.default_observer
+                self.default_observer,
+                description="""A file path to a CSV file detailing the hydrographic properties of the entire catchment
+                depicted by hydrographic the scenario. This file is usually provided by the scenario developer (if
+                usage of StepsRiverNetwork is supported by the scenario) and is made available as a project macro."""
             ),
             base.Input(
                 "WaterDischarge",
@@ -106,17 +137,21 @@ class StepsRiverNetwork(base.Component):
                     attrib.Unit("m³/d", 1),
                     attrib.Scales("time/hour, space/reach", 1)
                 ),
-                self.default_observer
+                self.default_observer,
+                description="The entire water discharge of this reach into the next downstream reach."
             ),
             base.Input(
                 "TimeSeriesStart",
                 (attrib.Class(datetime.datetime, 1), attrib.Unit(None, 1), attrib.Scales("global", 1)),
-                self.default_observer
+                self.default_observer,
+                description="""The first time step for which input data is provided. This is also the time step of where
+                the StepsRiverNetwork simulation starts."""
             ),
             base.Input(
                 "ReachesHydrology",
                 (attrib.Class(np.ndarray, 1), attrib.Unit(None, 1), attrib.Scales("space/reach", 1)),
-                self.default_observer
+                self.default_observer,
+                description="The numeric identifiers for individual reaches (in the order of the hydrological inputs)."
             ),
             base.Input(
                 "WaterVolume",
@@ -125,7 +160,8 @@ class StepsRiverNetwork(base.Component):
                     attrib.Unit("m³", 1),
                     attrib.Scales("time/hour, space/reach", 1)
                 ),
-                self.default_observer
+                self.default_observer,
+                description="The amount of water contained by a reach."
             ),
             base.Input(
                 "WetSurfaceArea",
@@ -134,7 +170,8 @@ class StepsRiverNetwork(base.Component):
                     attrib.Unit("m²", 1),
                     attrib.Scales("time/hour, space/reach", 1)
                 ),
-                self.default_observer
+                self.default_observer,
+                description="The surface area of a reach."
             ),
             base.Input(
                 "DriftDeposition",
@@ -143,39 +180,154 @@ class StepsRiverNetwork(base.Component):
                     attrib.Unit("mg/m²", 1),
                     attrib.Scales("time/day, space/reach", 1)
                 ),
-                self.default_observer
+                self.default_observer,
+                description="The average drift deposition onto the surface of a water body."
             ),
             base.Input(
                 "ReachesDrift",
                 (attrib.Class(np.ndarray, 1), attrib.Unit(None, 1), attrib.Scales("space/reach", 1)),
-                self.default_observer
+                self.default_observer,
+                description="""The numeric identifiers for individual reaches (in the order of the `DriftDeposition` 
+                input) that apply scenario-wide."""
             ),
-            base.Input("MolarMass", (attrib.Class(float, 1), attrib.Unit("g/mol", 1)), self.default_observer),
-            base.Input("DT50sw", (attrib.Class(float, 1), attrib.Unit("d", 1)), self.default_observer),
-            base.Input("DT50sed", (attrib.Class(float, 1), attrib.Unit("d", 1)), self.default_observer),
-            base.Input("KOC", (attrib.Class(float, 1), attrib.Unit("l/kg", 1)), self.default_observer),
-            base.Input("Temp0", (attrib.Class(float, 1), attrib.Unit("°C", 1)), self.default_observer),
-            base.Input("Q10", (attrib.Class(float, 1), attrib.Unit("1", 1)), self.default_observer),
-            base.Input("PlantUptake", (attrib.Class(float, 1), attrib.Unit("1", 1)), self.default_observer),
-            base.Input("QFac", (attrib.Class(float, 1), attrib.Unit("1", 1)), self.default_observer),
+            base.Input(
+                "MolarMass",
+                (attrib.Class(float, 1), attrib.Unit("g/mol", 1)),
+                self.default_observer,
+                description="The molar mass of the substance depositing at the water body surface."
+            ),
+            base.Input(
+                "DT50sw",
+                (attrib.Class(float, 1), attrib.Unit("d", 1)),
+                self.default_observer,
+                description="""The half-life transformation time in water of the substance depositing at the water body 
+                surface."""
+            ),
+            base.Input(
+                "DT50sed",
+                (attrib.Class(float, 1), attrib.Unit("d", 1)),
+                self.default_observer,
+                description="""The half-life transformation time in sediment of the substance depositing at the water 
+                body surface."""
+            ),
+            base.Input(
+                "KOC",
+                (attrib.Class(float, 1), attrib.Unit("l/kg", 1)),
+                self.default_observer,
+                description="""The coefficient for equilibrium adsorption in sediment of the substance depositing at 
+                the water body surface."""
+            ),
+            base.Input(
+                "Temp0",
+                (attrib.Class(float, 1), attrib.Unit("°C", 1)),
+                self.default_observer,
+                description="The reference temperature to which the physical and chemical substance values apply."
+            ),
+            base.Input(
+                "Q10",
+                (attrib.Class(float, 1), attrib.Unit("1", 1)),
+                self.default_observer,
+                description="The temperature coefficient for chemical reactions of the deposited substance."
+            ),
+            base.Input(
+                "PlantUptake",
+                (attrib.Class(float, 1), attrib.Unit("1", 1)),
+                self.default_observer,
+                description="The fraction of pesticide that is taken up by plants."
+            ),
+            base.Input(
+                "QFac",
+                (attrib.Class(float, 1), attrib.Unit("1", 1)),
+                self.default_observer,
+                description="The QFac parameter is not documented in the module documentation."
+            ),
             base.Input(
                 "ThresholdSW",
                 (attrib.Class(float, 1), attrib.Unit("mg/m³", 1)),
-                self.default_observer
+                self.default_observer,
+                description="The minimum surface water concentration that is reported."
             ),
             base.Input(
                 "ThresholdSediment",
                 (attrib.Class(float, 1), attrib.Unit("mg/kg", 1)),
-                self.default_observer
+                self.default_observer,
+                description="The minimum sediment concentration that is reported."
             )
         ])
         self._outputs = base.OutputContainer(self, [
-            base.Output("PEC_SW", store, self),
-            base.Output("MASS_SW", store, self),
-            base.Output("MASS_SED", store, self),
-            base.Output("MASS_SED_DEEP", store, self),
-            base.Output("PEC_SED", store, self),
-            base.Output("Reaches", store, self)
+            base.Output(
+                "PEC_SW",
+                store,
+                self,
+                {"data_type": np.float, "scales": "time/hour, space/base_geometry"},
+                "The modelled concentration in the water phase.",
+                {
+                    "type": np.ndarray,
+                    "shape": ("the number of simulated hours", "the number of simulated reaches"),
+                    "chunks": "for fast retrieval of time series",
+                    "unit": "mg/m³"
+                }
+            ),
+            base.Output(
+                "MASS_SW",
+                store,
+                self,
+                {"data_type": np.float, "scales": "time/hour, space/base_geometry"},
+                "The modelled substance mass in the water phase.",
+                {
+                    "type": np.ndarray,
+                    "shape": ("the number of simulated hours", "the number of simulated reaches"),
+                    "chunks": "for fast retrieval of time series",
+                    "unit": "mg"
+                }
+            ),
+            base.Output(
+                "MASS_SED",
+                store,
+                self,
+                {"data_type": np.float, "scales": "time/hour, space/base_geometry"},
+                "The modelled substance mass in sediment.",
+                {
+                    "type": np.ndarray,
+                    "shape": ("the number of simulated hours", "the number of simulated reaches"),
+                    "chunks": "for fast retrieval of time series",
+                    "unit": "mg"
+                }
+            ),
+            base.Output(
+                "MASS_SED_DEEP",
+                store,
+                self,
+                {"data_type": np.float, "scales": "time/hour, space/base_geometry"},
+                "The modelled substance mass in deep sediment.",
+                {
+                    "type": np.ndarray,
+                    "shape": ("the number of simulated hours", "the number of simulated reaches"),
+                    "chunks": "for fast retrieval of time series",
+                    "unit": "mg"
+                }
+            ),
+            base.Output(
+                "PEC_SED",
+                store,
+                self,
+                {"data_type": np.float, "scales": "time/hour, space/base_geometry"},
+                "The modelled concentration in sediment.",
+                {
+                    "type": np.ndarray,
+                    "shape": ("the number of simulated hours", "the number of simulated reaches"),
+                    "chunks": "for fast retrieval of time series",
+                    "unit": "mg/m³"
+                }
+            ),
+            base.Output(
+                "Reaches",
+                store,
+                self,
+                {"scales": "space/reach"},
+                "The numerical identifiers of the reaches in the order of the other outputs.",
+                {"type": "list[int]"}
+            )
         ])
         self._begin = None
         self._timeString = None
@@ -257,7 +409,7 @@ class StepsRiverNetwork(base.Component):
         data_source = driver.Open(hydrography, 0)
         layer = data_source.GetLayer()
         reaches_sorted = [int(r[1:]) for r in sorted(["r" + str(r) for r in reaches_hydrology])]
-        self.outputs["Reaches"].set_values(reaches_sorted, scales="space/reach")
+        self.outputs["Reaches"].set_values(reaches_sorted)
         with open(reach_list_file, "w") as f:
             # noinspection SpellCheckingInspection
             f.write(
@@ -383,9 +535,7 @@ class StepsRiverNetwork(base.Component):
                 self.outputs[variable[0]].set_values(
                     np.ndarray,
                     shape=data.shape,
-                    data_type=np.float,
                     chunks=(min(262144, data.shape[0]), 1),
-                    scales="time/hour, space/base_geometry",
                     unit=variable[1]
                 )
                 for chunk in base.chunk_slices(data.shape, (min(262144, data.shape[0]), 1)):
