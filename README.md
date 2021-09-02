@@ -17,15 +17,15 @@
 ## About the project
 The component encapsulating the Steps environmental fate module.  
 This is an automatically generated documentation based on the available code and in-line documentation. The current
-version of this document is from 2021-08-27.  
+version of this document is from 2021-09-02.  
 
 ### Built with
-* Landscape Model core version 1.5.9
+* Landscape Model core version 1.6
 * River network version of STEPS1234 version 0.93 (see `module\documentation\html\index.html` for details)
 
 
 ## Getting Started
-The component can be used in any Landscape Model based on core version 1.5.9 or newer. See the Landscape Model
+The component can be used in any Landscape Model based on core version 1.6 or newer. See the Landscape Model
 core's `README` for general tips on how to add a component to a Landscape Model.
 
 ### Prerequisites
