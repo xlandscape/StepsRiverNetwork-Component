@@ -4,7 +4,7 @@ Component for the Steps environmental fate module.
 import datetime
 import h5py
 import numpy as np
-import ogr
+from osgeo import ogr
 import os
 import shutil
 import base
@@ -17,6 +17,7 @@ class StepsRiverNetwork(base.Component):
     """
     # RELEASES
     VERSION = base.VersionCollection(
+        base.VersionInfo("2.0.4", "2021-09-01"),
         base.VersionInfo("2.0.3", "2021-08-27"),
         base.VersionInfo("2.0.2", "2021-07-19"),
         base.VersionInfo("2.0.1", "2020-12-03"),
@@ -99,6 +100,8 @@ class StepsRiverNetwork(base.Component):
     VERSION.changed("2.0.2", "Spellings")
     VERSION.changed("2.0.2", "Changelog uses markdown")
     VERSION.added("2.0.3", "Base documentation")
+    VERSION.changed("2.0.4", "ogr module import")
+    VERSION.changed("2.0.4", "Acknowledged default access mode for HDF files")
 
     def __init__(self, name, observer, store):
         super(StepsRiverNetwork, self).__init__(name, observer, store)
@@ -523,7 +526,7 @@ class StepsRiverNetwork(base.Component):
         :param output_file: The file path of the module output file.
         :return: Nothing.
         """
-        with h5py.File(output_file, "r") as f:
+        with h5py.File(output_file) as f:
             for variable in [
                 ("PEC_SW", "mg/m³"),
                 ("MASS_SW", "mg"),

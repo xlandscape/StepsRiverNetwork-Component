@@ -1,5 +1,16 @@
 # Changelog
-This is the changelog for the StepsRiverNetwork component. It was automatically created on 2021-08-27.
+This is the changelog for the StepsRiverNetwork component. It was automatically created on 2021-09-02.
+
+## [2.0.4] - 2021-09-01
+
+### Added
+
+### Changed
+- ogr module import
+- Acknowledged default access mode for HDF files
+
+### Fixed
+
 
 ## [2.0.3] - 2021-08-27
 
