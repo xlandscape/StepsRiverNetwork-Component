@@ -4,7 +4,7 @@ Component for the Steps environmental fate module.
 import datetime
 import h5py
 import numpy as np
-import ogr
+from osgeo import ogr
 import os
 import shutil
 import base
@@ -523,7 +523,7 @@ class StepsRiverNetwork(base.Component):
         :param output_file: The file path of the module output file.
         :return: Nothing.
         """
-        with h5py.File(output_file, "r") as f:
+        with h5py.File(output_file) as f:
             for variable in [
                 ("PEC_SW", "mg/m³"),
                 ("MASS_SW", "mg"),
