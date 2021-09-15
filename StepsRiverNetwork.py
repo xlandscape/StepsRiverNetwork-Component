@@ -187,6 +187,15 @@ class StepsRiverNetwork(base.Component):
                 description="The average drift deposition onto the surface of a water body."
             ),
             base.Input(
+                "DrainageLoad",
+                (
+                    attrib.Class(np.ndarray, 1),
+                    attrib.Unit("mg/m2/h", 1),
+                    attrib.Scales("time/hour, space/base_geometry", 1)
+                ),
+                self.default_observer
+            ),
+            base.Input(
                 "ReachesDrift",
                 (attrib.Class(np.ndarray, 1), attrib.Unit(None, 1), attrib.Scales("space/reach", 1)),
                 self.default_observer,
@@ -348,7 +357,8 @@ class StepsRiverNetwork(base.Component):
         os.makedirs(project_path)
         self.prepare_reaches_and_drift_deposition(os.path.join(project_path, "HydroList.csv"),
                                                   os.path.join(project_path, "ReachList.csv"),
-                                                  os.path.join(project_path, "SprayDriftList.csv"))
+                                                  os.path.join(project_path, "SprayDriftList.csv"),
+                                                  os.path.join(project_path, "DrainageList.csv"))
         self.prepare_catchment_list(os.path.join(project_path, "CatchmentList.csv"))
         self.prepare_project_list(processing_path, project_name)
         self.prepare_substance_list(os.path.join(project_path, "SubstanceList.csv"))
@@ -395,7 +405,7 @@ class StepsRiverNetwork(base.Component):
             f.write(str(self.inputs["ThresholdSediment"].read().values) + "\n")  # threshold_sed
         return
 
-    def prepare_reaches_and_drift_deposition(self, reaches_file, reach_list_file, spray_drift_file):
+    def prepare_reaches_and_drift_deposition(self, reaches_file, reach_list_file, spray_drift_file,drainage_list_file):
         """
         Prepares the reaches and drift deposition inputs.
         :param reaches_file: The file path of the reach file.
@@ -422,52 +432,70 @@ class StepsRiverNetwork(base.Component):
                 f2.write("key,time,volume,flow,area\n")
                 with open(spray_drift_file, "w") as f3:
                     f3.write("key,substance,time,rate\n")
-                    for reach in reaches_sorted:
-                        layer.SetAttributeFilter("key = '{}'".format(reach))
-                        for feature in layer:
-                            geom = feature.GetGeometryRef()
-                            coord = geom.GetPoint(0)
-                            downstream = feature.GetField("downstream")
-                            f.write("r" + str(reach) + ",")
-                            f.write(str(round(coord[0], 2)) + ",")  # x
-                            f.write(str(round(coord[1], 2)) + ",")  # y
-                            f.write(str(round(coord[2], 8)) + ",")  # z
-                            f.write(("" if downstream == "Outlet" else "r") + downstream + ',')
-                            f.write(str(feature.GetField("initial_de")) + ",")
-                            f.write(str(feature.GetField("manning_n")) + ",")
-                            # noinspection SpellCheckingInspection
-                            f.write(str(feature.GetField("bankslope")) + ",")
-                            f.write(str(feature.GetField("width")) + ",")
-                            f.write("200,")  # floodplain
-                            f.write(feature.GetField("shape_1") + ",")
-                            f.write(str(feature.GetField("dens")) + ",")
-                            f.write(str(feature.GetField("porosity")) + ",")
-                            f.write(str(feature.GetField("oc")) + ",")
-                            f.write(str(feature.GetField("depth_sed")) + ",")
-                            f.write(str(feature.GetField("depth_sed_")) + "\n")
-                            i = int(np.where(reaches_hydrology == reach)[0])
-                            discharge = self.inputs["WaterDischarge"].read(slices=(slice(number_time_steps), i)).values
-                            volume = self.inputs["WaterVolume"].read(slices=(slice(number_time_steps), i)).values
-                            area = self.inputs["WetSurfaceArea"].read(slices=(slice(number_time_steps), i)).values
-                            j = int(np.where(reaches_drift == reach)[0])
-                            drift_deposition = self.inputs["DriftDeposition"].read(
-                                slices=(slice(int(number_time_steps / 24)), j)).values
-                            for t in range(number_time_steps):
-                                self._timeString = (self._begin + datetime.timedelta(hours=t)).strftime(
-                                    "%Y-%m-%dT%H:%M")
-                                f2.write("r" + str(reach) + ",")
-                                f2.write(self._timeString + ",")
-                                f2.write(str(round(float(volume[t]), 2)) + ",")
-                                f2.write(str(round(float(discharge[t]), 2)) + ",")
-                                f2.write(str(round(float(area[t]), 2)) + "\n")
-                                if t % 24 == 11:
-                                    drift_deposition_value = drift_deposition[int((t - 11) / 24)]
-                                    if drift_deposition_value > 0:
-                                        f3.write("r" + str(reach) + ",")
-                                        f3.write("CMP_A,")
-                                        f3.write(self._timeString + ",")
-                                        f3.write("{:f}".format(float(drift_deposition_value)))
-                                        f3.write("\n")
+                    with open(drainage_list_file, "w") as f4:
+                        f4.write("key,substance,time,rate\n")
+                        for reach in reaches_sorted:
+                            layer.SetAttributeFilter("key = '{}'".format(reach))
+                            for feature in layer:
+                                geom = feature.GetGeometryRef()
+                                coord = geom.GetPoint(0)
+                                downstream = feature.GetField("downstream")
+                                f.write("r" + str(reach) + ",")
+                                f.write(str(round(coord[0], 2)) + ",")  # x
+                                f.write(str(round(coord[1], 2)) + ",")  # y
+                                f.write(str(round(coord[2], 8)) + ",")  # z
+                                f.write(("" if downstream == "Outlet" else "r") + downstream + ',')
+                                f.write(str(feature.GetField("initial_de")) + ",")
+                                f.write(str(feature.GetField("manning_n")) + ",")
+                                # noinspection SpellCheckingInspection
+                                f.write(str(feature.GetField("bankslope")) + ",")
+                                f.write(str(feature.GetField("width")) + ",")
+                                f.write("200,")  # floodplain
+                                f.write(feature.GetField("shape_1") + ",")
+                                f.write(str(feature.GetField("dens")) + ",")
+                                f.write(str(feature.GetField("porosity")) + ",")
+                                f.write(str(feature.GetField("oc")) + ",")
+                                f.write(str(feature.GetField("depth_sed")) + ",")
+                                f.write(str(feature.GetField("depth_sed_")) + "\n")
+                                i = int(np.where(reaches_hydrology == reach)[0])
+                                discharge = self.inputs["WaterDischarge"].read(slices=(slice(number_time_steps), i)).values
+                                volume = self.inputs["WaterVolume"].read(slices=(slice(number_time_steps), i)).values
+                                area = self.inputs["WetSurfaceArea"].read(slices=(slice(number_time_steps), i)).values
+                                j = int(np.where(reaches_drift == reach)[0])
+                                drift_deposition = self.inputs["DriftDeposition"].read(
+                                    slices=(slice(int(number_time_steps / 24)), j)).values
+                                for t in range(number_time_steps):
+                                    self._timeString = (self._begin + datetime.timedelta(hours=t)).strftime(
+                                        "%Y-%m-%dT%H:%M")
+                                    f2.write("r" + str(reach) + ",")
+                                    f2.write(self._timeString + ",")
+                                    f2.write(str(round(float(volume[t]), 2)) + ",")
+                                    f2.write(str(round(float(discharge[t]), 2)) + ",")
+                                    f2.write(str(round(float(area[t]), 2)) + "\n")
+                                    if t % 24 == 11:
+                                        drift_deposition_value = drift_deposition[int((t - 11) / 24)]
+                                        if drift_deposition_value > 0:
+                                            f3.write("r" + str(reach) + ",")
+                                            f3.write("CMP_A,")
+                                            f3.write(self._timeString + ",")
+                                            f3.write("{:f}".format(float(drift_deposition_value)))
+                                            f3.write("\n")
+                                            
+                                                                # get drift results
+                                DrainageLoad = self.inputs["DrainageLoad"].read( slices=(slice(number_time_steps), i)).values
+                    
+                                # write drainage list
+                                for t in range(number_time_steps):
+                                    self._timeString = (self._begin + datetime.timedelta(hours=t)).strftime(
+                                        "%Y-%m-%dT%H:%M")
+                                    if DrainageLoad[t] > 0:
+                                        f4.write("r" + str(reach) + ",")
+                                        f4.write("CMP_A,")
+                                        f4.write(self._timeString + ",")
+                                        f4.write("{:f}".format(float(DrainageLoad[t])))
+                                        f4.write("\n")
+
+                                        
                         layer.ResetReading()
         return
 
