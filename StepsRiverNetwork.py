@@ -17,6 +17,7 @@ class StepsRiverNetwork(base.Component):
     """
     # RELEASES
     VERSION = base.VersionCollection(
+        base.VersionInfo("2.0.5", "2021-10-11"),
         base.VersionInfo("2.0.4", "2021-09-01"),
         base.VersionInfo("2.0.3", "2021-08-27"),
         base.VersionInfo("2.0.2", "2021-07-19"),
@@ -102,6 +103,7 @@ class StepsRiverNetwork(base.Component):
     VERSION.added("2.0.3", "Base documentation")
     VERSION.changed("2.0.4", "ogr module import")
     VERSION.changed("2.0.4", "Acknowledged default access mode for HDF files")
+    VERSION.changed("2.0.5", "Replaced legacy format strings by f-strings")
 
     def __init__(self, name, observer, store):
         super(StepsRiverNetwork, self).__init__(name, observer, store)
