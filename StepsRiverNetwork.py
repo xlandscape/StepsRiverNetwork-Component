@@ -17,6 +17,7 @@ class StepsRiverNetwork(base.Component):
     """
     # RELEASES
     VERSION = base.VersionCollection(
+        base.VersionInfo("2.0.5", "2021-10-11"),
         base.VersionInfo("2.0.4", "2021-09-01"),
         base.VersionInfo("2.0.3", "2021-08-27"),
         base.VersionInfo("2.0.2", "2021-07-19"),
@@ -102,6 +103,7 @@ class StepsRiverNetwork(base.Component):
     VERSION.added("2.0.3", "Base documentation")
     VERSION.changed("2.0.4", "ogr module import")
     VERSION.changed("2.0.4", "Acknowledged default access mode for HDF files")
+    VERSION.changed("2.0.5", "Replaced legacy format strings by f-strings")
 
     def __init__(self, name, observer, store):
         super(StepsRiverNetwork, self).__init__(name, observer, store)
@@ -363,19 +365,20 @@ class StepsRiverNetwork(base.Component):
         :param project_name: The name of the module project.
         :return: Nothing.
         """
-        project_list_file = os.path.join(processing_path, project_name + ".csv")
+        project_list_file = os.path.join(processing_path, f"{project_name}.csv")
         with open(project_list_file, "w") as f:
             # noinspection SpellCheckingInspection
             f.write(
-                "key,fpath,database,begin,end,t_input_start,timestep_input,timestep_simulation,timestep_output," +
-                "aggregation_output,withHydro,write_summary,substance,simulation,preprocessing,postprocessing," +
-                "MASS_SW,MASS_SED,MASS_SED_DEEP,PEC_SW,PEC_SED,threshold_sw,threshold_sed\n")
-            f.write(project_name + ",")  # key
-            f.write(processing_path + ",")  # file path
+                "key,fpath,database,begin,end,t_input_start,timestep_input,timestep_simulation,timestep_output,"
+                "aggregation_output,withHydro,write_summary,substance,simulation,preprocessing,postprocessing,"
+                "MASS_SW,MASS_SED,MASS_SED_DEEP,PEC_SW,PEC_SED,threshold_sw,threshold_sed\n"
+            )
+            f.write(f"{project_name},")
+            f.write(f"{processing_path},")
             f.write("csv,")  # database
-            f.write(self._begin.strftime("%Y-%m-%dT%H:%M") + ",")  # begin
-            f.write(self._timeString + ",")  # end
-            f.write(self._begin.strftime("%Y-%m-%dT%H:%M") + ",")  # t_input_start
+            f.write(f"{self._begin.strftime('%Y-%m-%dT%H:%M')},")
+            f.write(f"{self._timeString},")
+            f.write(f"{self._begin.strftime('%Y-%m-%dT%H:%M')},")
             f.write("1H,")  # time step input
             f.write("1Min,")  # time step simulation
             f.write("1H,")  # time step output
@@ -391,8 +394,8 @@ class StepsRiverNetwork(base.Component):
             f.write("TRUE,")  # *MASS_SED_DEEP
             f.write("TRUE,")  # PEC_SW
             f.write("TRUE,")  # PEC_SED
-            f.write(str(self.inputs["ThresholdSW"].read().values) + ",")  # threshold_sw
-            f.write(str(self.inputs["ThresholdSediment"].read().values) + "\n")  # threshold_sed
+            f.write(f"{self.inputs['ThresholdSW'].read().values},")
+            f.write(f"{self.inputs['ThresholdSediment'].read().values}\n")
         return
 
     def prepare_reaches_and_drift_deposition(self, reaches_file, reach_list_file, spray_drift_file):
@@ -411,40 +414,41 @@ class StepsRiverNetwork(base.Component):
         driver = ogr.GetDriverByName("ESRI Shapefile")
         data_source = driver.Open(hydrography, 0)
         layer = data_source.GetLayer()
-        reaches_sorted = [int(r[1:]) for r in sorted(["r" + str(r) for r in reaches_hydrology])]
+        reaches_sorted = [int(r[1:]) for r in sorted([f"r{r}" for r in reaches_hydrology])]
         self.outputs["Reaches"].set_values(reaches_sorted)
         with open(reach_list_file, "w") as f:
             # noinspection SpellCheckingInspection
             f.write(
-                "key,x,y,z,downstream,initial_depth,manning_n,bankslope,bottomwidth,floodplainslope,shape,dens," +
-                "porosity,oc,depth_sed,depth_sed_deep\n")
+                "key,x,y,z,downstream,initial_depth,manning_n,bankslope,bottomwidth,floodplainslope,shape,dens,"
+                "porosity,oc,depth_sed,depth_sed_deep\n"
+            )
             with open(reaches_file, "w") as f2:
                 f2.write("key,time,volume,flow,area\n")
                 with open(spray_drift_file, "w") as f3:
                     f3.write("key,substance,time,rate\n")
                     for reach in reaches_sorted:
-                        layer.SetAttributeFilter("key = '{}'".format(reach))
+                        layer.SetAttributeFilter(f"key = '{reach}'")
                         for feature in layer:
                             geom = feature.GetGeometryRef()
                             coord = geom.GetPoint(0)
                             downstream = feature.GetField("downstream")
-                            f.write("r" + str(reach) + ",")
-                            f.write(str(round(coord[0], 2)) + ",")  # x
-                            f.write(str(round(coord[1], 2)) + ",")  # y
-                            f.write(str(round(coord[2], 8)) + ",")  # z
-                            f.write(("" if downstream == "Outlet" else "r") + downstream + ',')
-                            f.write(str(feature.GetField("initial_de")) + ",")
-                            f.write(str(feature.GetField("manning_n")) + ",")
+                            f.write(f"r{reach},")
+                            f.write(f"{round(coord[0], 2)},")
+                            f.write(f"{round(coord[1], 2)},")
+                            f.write(f"{round(coord[2], 8)},")
+                            f.write(f"{'' if downstream == 'Outlet' else 'r'}{downstream},")
+                            f.write(f"{feature.GetField('initial_de')},")
+                            f.write(f"{feature.GetField('manning_n')},")
                             # noinspection SpellCheckingInspection
-                            f.write(str(feature.GetField("bankslope")) + ",")
-                            f.write(str(feature.GetField("width")) + ",")
+                            f.write(f"{feature.GetField('bankslope')},")
+                            f.write(f"{feature.GetField('width')},")
                             f.write("200,")  # floodplain
-                            f.write(feature.GetField("shape_1") + ",")
-                            f.write(str(feature.GetField("dens")) + ",")
-                            f.write(str(feature.GetField("porosity")) + ",")
-                            f.write(str(feature.GetField("oc")) + ",")
-                            f.write(str(feature.GetField("depth_sed")) + ",")
-                            f.write(str(feature.GetField("depth_sed_")) + "\n")
+                            f.write(f"{feature.GetField('shape_1')},")
+                            f.write(f"{feature.GetField('dens')},")
+                            f.write(f"{feature.GetField('porosity')},")
+                            f.write(f"{feature.GetField('oc')},")
+                            f.write(f"{feature.GetField('depth_sed')},")
+                            f.write(f"{feature.GetField('depth_sed_')}\n")
                             i = int(np.where(reaches_hydrology == reach)[0])
                             discharge = self.inputs["WaterDischarge"].read(slices=(slice(number_time_steps), i)).values
                             volume = self.inputs["WaterVolume"].read(slices=(slice(number_time_steps), i)).values
@@ -455,18 +459,18 @@ class StepsRiverNetwork(base.Component):
                             for t in range(number_time_steps):
                                 self._timeString = (self._begin + datetime.timedelta(hours=t)).strftime(
                                     "%Y-%m-%dT%H:%M")
-                                f2.write("r" + str(reach) + ",")
-                                f2.write(self._timeString + ",")
-                                f2.write(str(round(float(volume[t]), 2)) + ",")
-                                f2.write(str(round(float(discharge[t]), 2)) + ",")
-                                f2.write(str(round(float(area[t]), 2)) + "\n")
+                                f2.write(f"r{reach},")
+                                f2.write(f"{self._timeString},")
+                                f2.write(f"{round(float(volume[t]), 2)},")
+                                f2.write(f"{round(float(discharge[t]), 2)},")
+                                f2.write(f"{round(float(area[t]), 2)}\n")
                                 if t % 24 == 11:
                                     drift_deposition_value = drift_deposition[int((t - 11) / 24)]
                                     if drift_deposition_value > 0:
-                                        f3.write("r" + str(reach) + ",")
+                                        f3.write(f"r{reach},")
                                         f3.write("CMP_A,")
-                                        f3.write(self._timeString + ",")
-                                        f3.write("{:f}".format(float(drift_deposition_value)))
+                                        f3.write(f"{self._timeString},")
+                                        f3.write(f"{format(float(drift_deposition_value), 'f')}")
                                         f3.write("\n")
                         layer.ResetReading()
         return
@@ -508,16 +512,12 @@ class StepsRiverNetwork(base.Component):
             # noinspection SpellCheckingInspection
             f.write("key,molarmass,DT50sw,DT50sed,KOC,Temp0,Q10,plantuptake,QFAC\n")
             # noinspection SpellCheckingInspection
-            f.write("CMP_A,{},{},{},{},{},{},{},{}\n".format(
-                self.inputs["MolarMass"].read().values,
-                self.inputs["DT50sw"].read().values,
-                self.inputs["DT50sed"].read().values,
-                self.inputs["KOC"].read().values,
-                self.inputs["Temp0"].read().values,
-                self.inputs["Q10"].read().values,
-                self.inputs["PlantUptake"].read().values,
-                self.inputs["QFac"].read().values
-            ))
+            f.write(
+                f"CMP_A,{self.inputs['MolarMass'].read().values},{self.inputs['DT50sw'].read().values},"
+                f"{self.inputs['DT50sed'].read().values},{self.inputs['KOC'].read().values},"
+                f"{self.inputs['Temp0'].read().values},{self.inputs['Q10'].read().values},"
+                f"{self.inputs['PlantUptake'].read().values},{self.inputs['QFac'].read().values}\n"
+            )
         return
 
     def read_outputs(self, output_file):
@@ -534,7 +534,7 @@ class StepsRiverNetwork(base.Component):
                 ("MASS_SED_DEEP", "mg"),
                 ("PEC_SED", "mg/m³")
             ]:
-                data = f["/" + variable[0]]
+                data = f[f"/{variable[0]}"]
                 self.outputs[variable[0]].set_values(
                     np.ndarray,
                     shape=data.shape,
