@@ -13,6 +13,7 @@ class StepsRiverNetwork(base.Component):
     """The component encapsulating the Steps environmental fate module."""
     # RELEASES
     VERSION = base.VersionCollection(
+        base.VersionInfo("2.0.6", "2021-10-12"),
         base.VersionInfo("2.0.5", "2021-10-11"),
         base.VersionInfo("2.0.4", "2021-09-01"),
         base.VersionInfo("2.0.3", "2021-08-27"),
@@ -100,6 +101,7 @@ class StepsRiverNetwork(base.Component):
     VERSION.changed("2.0.4", "ogr module import")
     VERSION.changed("2.0.4", "Acknowledged default access mode for HDF files")
     VERSION.changed("2.0.5", "Replaced legacy format strings by f-strings")
+    VERSION.changed("2.0.6", "Switched to Google docstring style")
 
     def __init__(self, name, observer, store):
         """
