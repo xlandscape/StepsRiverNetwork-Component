@@ -1,5 +1,15 @@
 # Changelog
-This is the changelog for the StepsRiverNetwork component. It was automatically created on 2021-10-11.
+This is the changelog for the StepsRiverNetwork component. It was automatically created on 2021-10-12.
+
+## [2.0.6] - 2021-10-12
+
+### Added
+
+### Changed
+- Switched to Google docstring style
+
+### Fixed
+
 
 ## [2.0.5] - 2021-10-11
 
