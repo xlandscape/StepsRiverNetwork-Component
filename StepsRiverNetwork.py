@@ -1,6 +1,4 @@
-"""
-Component for the Steps environmental fate module.
-"""
+"""Component for the Steps environmental fate module."""
 import datetime
 import h5py
 import numpy as np
@@ -12,11 +10,10 @@ import attrib
 
 
 class StepsRiverNetwork(base.Component):
-    """
-    The component encapsulating the Steps environmental fate module.
-    """
+    """The component encapsulating the Steps environmental fate module."""
     # RELEASES
     VERSION = base.VersionCollection(
+        base.VersionInfo("2.0.6", "2021-10-12"),
         base.VersionInfo("2.0.5", "2021-10-11"),
         base.VersionInfo("2.0.4", "2021-09-01"),
         base.VersionInfo("2.0.3", "2021-08-27"),
@@ -104,8 +101,17 @@ class StepsRiverNetwork(base.Component):
     VERSION.changed("2.0.4", "ogr module import")
     VERSION.changed("2.0.4", "Acknowledged default access mode for HDF files")
     VERSION.changed("2.0.5", "Replaced legacy format strings by f-strings")
+    VERSION.changed("2.0.6", "Switched to Google docstring style")
 
     def __init__(self, name, observer, store):
+        """
+        Initializes a StepsRiverNetwork component.
+
+        Args:
+            name: The name of the component.
+            observer: The default observer of the component.
+            store: The default store of the component.
+        """
         super(StepsRiverNetwork, self).__init__(name, observer, store)
         self._module = base.Module(
             "River network version of STEPS1234", "0.93", r"module\documentation\html\index.html")
@@ -336,12 +342,13 @@ class StepsRiverNetwork(base.Component):
         ])
         self._begin = None
         self._timeString = None
-        return
 
     def run(self):
         """
         Runs the component.
-        :return: Nothing.
+
+        Returns:
+            Nothing.
         """
         self.default_observer.write_message(2, "Component relies on insensible high precision of z-coordinate")
         project_name = "h1"
@@ -356,14 +363,17 @@ class StepsRiverNetwork(base.Component):
         self.prepare_substance_list(os.path.join(project_path, "SubstanceList.csv"))
         self.run_project(processing_path, project_name)
         self.read_outputs(os.path.join(project_path, "h1_reaches.h5"))
-        return
 
     def prepare_project_list(self, processing_path, project_name):
         """
         Prepares th project list.
-        :param processing_path: The working directory of the module.
-        :param project_name: The name of the module project.
-        :return: Nothing.
+
+        Args:
+            processing_path: The working directory of the module.
+            project_name: The name of the module project.
+
+        Returns:
+            Nothing.
         """
         project_list_file = os.path.join(processing_path, f"{project_name}.csv")
         with open(project_list_file, "w") as f:
@@ -396,15 +406,18 @@ class StepsRiverNetwork(base.Component):
             f.write("TRUE,")  # PEC_SED
             f.write(f"{self.inputs['ThresholdSW'].read().values},")
             f.write(f"{self.inputs['ThresholdSediment'].read().values}\n")
-        return
 
     def prepare_reaches_and_drift_deposition(self, reaches_file, reach_list_file, spray_drift_file):
         """
         Prepares the reaches and drift deposition inputs.
-        :param reaches_file: The file path of the reach file.
-        :param reach_list_file: The file path of the reach list file.
-        :param spray_drift_file: The file path of the spray-drift file.
-        :return: Nothing.
+
+        Args:
+            reaches_file: The file path of the reach file.
+            reach_list_file: The file path of the reach list file.
+            spray_drift_file: The file path of the spray-drift file.
+
+        Returns:
+            Nothing.
         """
         hydrography = self.inputs["Hydrography"].read().values
         reaches_hydrology = self.inputs["ReachesHydrology"].read().values
@@ -473,23 +486,29 @@ class StepsRiverNetwork(base.Component):
                                         f3.write(f"{format(float(drift_deposition_value), 'f')}")
                                         f3.write("\n")
                         layer.ResetReading()
-        return
 
     def prepare_catchment_list(self, catchment_file):
         """
         Prepares the catchment list.
-        :param catchment_file: The file path of the catchment list.
-        :return: Nothing.
+
+        Args:
+            catchment_file: The file path of the catchment list.
+
+        Returns:
+            Nothing.
         """
         shutil.copyfile(self.inputs["Catchment"].read().values, catchment_file)
-        return
 
     def run_project(self, processing_path, project_name):
         """
         Runs the module project.
-        :param processing_path: The working directory for the module.
-        :param project_name: The name of the module project.
-        :return: Nothing.
+
+        Args:
+            processing_path: The working directory for the module.
+            project_name: The name of the module project.
+
+        Returns:
+            Nothing.
         """
         python_exe = os.path.join(os.path.dirname(__file__), "module", "bin", "python", "python.exe")
         python_script = os.path.join(os.path.dirname(__file__), "module", "bin", "main.py")
@@ -500,13 +519,16 @@ class StepsRiverNetwork(base.Component):
             self.default_observer,
             {"HOMEPATH": processing_path}
         )
-        return
 
     def prepare_substance_list(self, substance_list_file):
         """
         Prepares the substance list.
-        :param substance_list_file: The file path of the substance list.
-        :return: Nothing.
+
+        Args:
+            substance_list_file: The file path of the substance list.
+
+        Returns:
+            Nothing.
         """
         with open(substance_list_file, "w") as f:
             # noinspection SpellCheckingInspection
@@ -518,13 +540,16 @@ class StepsRiverNetwork(base.Component):
                 f"{self.inputs['Temp0'].read().values},{self.inputs['Q10'].read().values},"
                 f"{self.inputs['PlantUptake'].read().values},{self.inputs['QFac'].read().values}\n"
             )
-        return
 
     def read_outputs(self, output_file):
         """
         Reads the module outputs into the landscape model.
-        :param output_file: The file path of the module output file.
-        :return: Nothing.
+
+        Args:
+            output_file: The file path of the module output file.
+
+        Returns:
+            Nothing.
         """
         with h5py.File(output_file) as f:
             for variable in [
@@ -543,4 +568,3 @@ class StepsRiverNetwork(base.Component):
                 )
                 for chunk in base.chunk_slices(data.shape, (min(262144, data.shape[0]), 1)):
                     self.outputs[variable[0]].set_values(data[chunk], slices=chunk, create=False, calculate_max=True)
-        return
