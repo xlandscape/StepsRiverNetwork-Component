@@ -13,6 +13,7 @@ class StepsRiverNetwork(base.Component):
     """The component encapsulating the Steps environmental fate module."""
     # RELEASES
     VERSION = base.VersionCollection(
+        base.VersionInfo("2.0.7", "2021-10-19"),
         base.VersionInfo("2.0.6", "2021-10-12"),
         base.VersionInfo("2.0.5", "2021-10-11"),
         base.VersionInfo("2.0.4", "2021-09-01"),
@@ -102,6 +103,7 @@ class StepsRiverNetwork(base.Component):
     VERSION.changed("2.0.4", "Acknowledged default access mode for HDF files")
     VERSION.changed("2.0.5", "Replaced legacy format strings by f-strings")
     VERSION.changed("2.0.6", "Switched to Google docstring style")
+    VERSION.changed("2.0.7", "Specified working directory for module")
 
     def __init__(self, name, observer, store):
         """
@@ -515,7 +517,7 @@ class StepsRiverNetwork(base.Component):
         # noinspection SpellCheckingInspection
         base.run_process(
             (python_exe, python_script, "--folder", processing_path, "--runlist", project_name),
-            None,
+            processing_path,
             self.default_observer,
             {"HOMEPATH": processing_path}
         )
