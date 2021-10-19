@@ -1,5 +1,15 @@
 # Changelog
-This is the changelog for the StepsRiverNetwork component. It was automatically created on 2021-10-12.
+This is the changelog for the StepsRiverNetwork component. It was automatically created on 2021-10-19.
+
+## [2.0.7] - 2021-10-19
+
+### Added
+
+### Changed
+- Specified working directory for module
+
+### Fixed
+
 
 ## [2.0.6] - 2021-10-12
 
