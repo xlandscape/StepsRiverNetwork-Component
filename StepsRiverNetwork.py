@@ -515,7 +515,7 @@ class StepsRiverNetwork(base.Component):
         # noinspection SpellCheckingInspection
         base.run_process(
             (python_exe, python_script, "--folder", processing_path, "--runlist", project_name),
-            None,
+            processing_path,
             self.default_observer,
             {"HOMEPATH": processing_path}
         )
