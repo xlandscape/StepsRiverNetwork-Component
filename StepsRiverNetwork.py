@@ -127,15 +127,6 @@ class StepsRiverNetwork(base.Component):
                 or generated as (temporary) module outputs."""
             ),
             base.Input(
-                "Hydrography",
-                (attrib.Class(str, 1), attrib.Unit(None, 1), attrib.Scales("global", 1)),
-                self.default_observer,
-                description="""The spatial delineation of the hydrographic features in the simulated landscape. This
-                input basically represents the flow-lines used during preparation of the hydrology. The hydrography is
-                consistently for all components of the Landscape Model subdivided into individual segments (*reaches*).
-                """
-            ),
-            base.Input(
                 "Catchment",
                 (attrib.Class(str, 1), attrib.Unit(None, 1), attrib.Scales("global", 1)),
                 self.default_observer,
@@ -265,6 +256,91 @@ class StepsRiverNetwork(base.Component):
                 (attrib.Class(float, 1), attrib.Unit("mg/kg", 1)),
                 self.default_observer,
                 description="The minimum sediment concentration that is reported."
+            ),
+            base.Input(
+                "HydrographyReaches",
+                (attrib.Class(list[int]), attrib.Unit(None), attrib.Scales("space/base_geometry")),
+                self.default_observer,
+                description="""The numerical identifiers of individual reaches in the order used by the inputs
+                `HydrographyGeometries`, `DownstreamReach`, `BottomWidth`, `BankSlope`, `OrganicContent`, `BulkDensity`
+                 and `Porosity`."""
+            ),
+            base.Input(
+                "HydrographyGeometries",
+                (attrib.Class(list[bytes]), attrib.Unit(None), attrib.Scales("space/base_geometry")),
+                self.default_observer,
+                description="The geometries of individual water body segments (reaches) in WKB representation."
+            ),
+            base.Input(
+                "DownstreamReach",
+                (attrib.Class(list[str]), attrib.Unit(None), attrib.Scales("space/base_geometry")),
+                self.default_observer,
+                description="The identifier of the reach that is located downstream of the current reach."
+            ),
+            base.Input(
+                "InitialDepth",
+                (attrib.Class(list[float]), attrib.Unit("m"), attrib.Scales("space/base_geometry")),
+                self.default_observer,
+                description="The initial water depth of the current reach."
+            ),
+            base.Input(
+                "Manning",
+                (attrib.Class(list[float]), attrib.Unit("1"), attrib.Scales("space/base_geometry")),
+                self.default_observer,
+                description="The Manning friction number applying to the current reach."
+            ),
+            base.Input(
+                "BankSlope",
+                (attrib.Class(list[float]), attrib.Unit("1"), attrib.Scales("space/base_geometry")),
+                self.default_observer,
+                description="The slope of the reach."
+            ),
+            base.Input(
+                "Width",
+                (attrib.Class(list[float]), attrib.Unit("m"), attrib.Scales("space/base_geometry")),
+                self.default_observer,
+                description="The width of the reach (undocumented by the module)."
+            ),
+            base.Input(
+                "Shape",
+                (
+                    attrib.Class(list[str]),
+                    attrib.Unit(None),
+                    attrib.Scales("space/base_geometry"),
+                    attrib.InList(("TriangularReach", "RectangularReach", "SWATReachType"))
+                ),
+                self.default_observer,
+                description="The shape of the current reach."
+            ),
+            base.Input(
+                "BulkDensity",
+                (attrib.Class(list[float]), attrib.Unit("kg/m³"), attrib.Scales("space/base_geometry")),
+                self.default_observer,
+                description="The mass density of the reach sediment."
+            ),
+            base.Input(
+                "Porosity",
+                (attrib.Class(list[float]), attrib.Unit("m³/m³"), attrib.Scales("space/base_geometry")),
+                self.default_observer,
+                description="The porosity of the reach sediment."
+            ),
+            base.Input(
+                "OrganicContent",
+                (attrib.Class(list[float]), attrib.Unit("g/g"), attrib.Scales("space/base_geometry")),
+                self.default_observer,
+                description="The amount of organic material in the sediment of the reach."
+            ),
+            base.Input(
+                "SedimentDepth1stLayer",
+                (attrib.Class(list[float]), attrib.Unit("m"), attrib.Scales("space/base_geometry")),
+                self.default_observer,
+                description="The depth of the first layer of sediment."
+            ),
+            base.Input(
+                "SedimentDepth2ndLayer",
+                (attrib.Class(list[float]), attrib.Unit("m"), attrib.Scales("space/base_geometry")),
+                self.default_observer,
+                description="The depth of the second layer of sediment."
             )
         ])
         self._outputs = base.OutputContainer(self, [
@@ -357,9 +433,11 @@ class StepsRiverNetwork(base.Component):
         processing_path = self.inputs["ProcessingPath"].read().values
         project_path = os.path.join(processing_path, project_name)
         os.makedirs(project_path)
-        self.prepare_reaches_and_drift_deposition(os.path.join(project_path, "HydroList.csv"),
-                                                  os.path.join(project_path, "ReachList.csv"),
-                                                  os.path.join(project_path, "SprayDriftList.csv"))
+        self.prepare_reaches_and_drift_deposition(
+            os.path.join(project_path, "HydroList.csv"),
+            os.path.join(project_path, "ReachList.csv"),
+            os.path.join(project_path, "SprayDriftList.csv")
+        )
         self.prepare_catchment_list(os.path.join(project_path, "CatchmentList.csv"))
         self.prepare_project_list(processing_path, project_name)
         self.prepare_substance_list(os.path.join(project_path, "SubstanceList.csv"))
@@ -421,15 +499,24 @@ class StepsRiverNetwork(base.Component):
         Returns:
             Nothing.
         """
-        hydrography = self.inputs["Hydrography"].read().values
         reaches_hydrology = self.inputs["ReachesHydrology"].read().values
         self._begin = self.inputs["TimeSeriesStart"].read().values
         number_time_steps = self.inputs["WaterDischarge"].describe()["shape"][0]
         reaches_drift = self.inputs["ReachesDrift"].read().values
-        driver = ogr.GetDriverByName("ESRI Shapefile")
-        data_source = driver.Open(hydrography, 0)
-        layer = data_source.GetLayer()
         reaches_sorted = [int(r[1:]) for r in sorted([f"r{r}" for r in reaches_hydrology])]
+        hydrography_reaches = self.inputs["HydrographyReaches"].read().values
+        hydrography_geometries = self.inputs["HydrographyGeometries"].read().values
+        downstream_reaches = self.inputs["DownstreamReach"].read().values
+        initial_depths = self.inputs["InitialDepth"].read().values
+        manning = self.inputs["Manning"].read().values
+        bank_slopes = self.inputs["BankSlope"].read().values
+        widths = self.inputs["Width"].read().values
+        shapes = self.inputs["Shape"].read().values
+        bulk_densities = self.inputs["BulkDensity"].read().values
+        porosity = self.inputs["Porosity"].read().values
+        organic_contents = self.inputs["OrganicContent"].read().values
+        depths_sediment_1 = self.inputs["SedimentDepth1stLayer"].read().values
+        depths_sediment_2 = self.inputs["SedimentDepth2ndLayer"].read().values
         self.outputs["Reaches"].set_values(reaches_sorted)
         with open(reach_list_file, "w") as f:
             # noinspection SpellCheckingInspection
@@ -442,52 +529,49 @@ class StepsRiverNetwork(base.Component):
                 with open(spray_drift_file, "w") as f3:
                     f3.write("key,substance,time,rate\n")
                     for reach in reaches_sorted:
-                        layer.SetAttributeFilter(f"key = '{reach}'")
-                        for feature in layer:
-                            geom = feature.GetGeometryRef()
-                            coord = geom.GetPoint(0)
-                            downstream = feature.GetField("downstream")
-                            f.write(f"r{reach},")
-                            f.write(f"{round(coord[0], 2)},")
-                            f.write(f"{round(coord[1], 2)},")
-                            f.write(f"{round(coord[2], 8)},")
-                            f.write(f"{'' if downstream == 'Outlet' else 'r'}{downstream},")
-                            f.write(f"{feature.GetField('initial_de')},")
-                            f.write(f"{feature.GetField('manning_n')},")
-                            # noinspection SpellCheckingInspection
-                            f.write(f"{feature.GetField('bankslope')},")
-                            f.write(f"{feature.GetField('width')},")
-                            f.write("200,")  # floodplain
-                            f.write(f"{feature.GetField('shape_1')},")
-                            f.write(f"{feature.GetField('dens')},")
-                            f.write(f"{feature.GetField('porosity')},")
-                            f.write(f"{feature.GetField('oc')},")
-                            f.write(f"{feature.GetField('depth_sed')},")
-                            f.write(f"{feature.GetField('depth_sed_')}\n")
-                            i = int(np.where(reaches_hydrology == reach)[0])
-                            discharge = self.inputs["WaterDischarge"].read(slices=(slice(number_time_steps), i)).values
-                            volume = self.inputs["WaterVolume"].read(slices=(slice(number_time_steps), i)).values
-                            area = self.inputs["WetSurfaceArea"].read(slices=(slice(number_time_steps), i)).values
-                            j = int(np.where(reaches_drift == reach)[0])
-                            drift_deposition = self.inputs["DriftDeposition"].read(
-                                slices=(slice(int(number_time_steps / 24)), j)).values
-                            for t in range(number_time_steps):
-                                self._timeString = (self._begin + datetime.timedelta(hours=t)).strftime(
-                                    "%Y-%m-%dT%H:%M")
-                                f2.write(f"r{reach},")
-                                f2.write(f"{self._timeString},")
-                                f2.write(f"{round(float(volume[t]), 2)},")
-                                f2.write(f"{round(float(discharge[t]), 2)},")
-                                f2.write(f"{round(float(area[t]), 2)}\n")
-                                if t % 24 == 11:
-                                    drift_deposition_value = drift_deposition[int((t - 11) / 24)]
-                                    if drift_deposition_value > 0:
-                                        f3.write(f"r{reach},")
-                                        f3.write("CMP_A,")
-                                        f3.write(f"{self._timeString},")
-                                        f3.write(f"{format(float(drift_deposition_value), 'f')}")
-                                        f3.write("\n")
-                        layer.ResetReading()
+                        hydrography_index = hydrography_reaches.index(reach)
+                        geom = ogr.CreateGeometryFromWkb(hydrography_geometries[hydrography_index])
+                        coord = geom.GetPoint(0)
+                        downstream = downstream_reaches[hydrography_index]
+                        f.write(f"r{reach},")
+                        f.write(f"{round(coord[0], 2)},")
+                        f.write(f"{round(coord[1], 2)},")
+                        f.write(f"{round(coord[2], 8)},")
+                        f.write(f"{'' if downstream == 'Outlet' else 'r'}{downstream},")
+                        f.write(f"{initial_depths[hydrography_index]},")
+                        f.write(f"{manning[hydrography_index]},")
+                        f.write(f"{bank_slopes[hydrography_index]},")
+                        f.write(f"{widths[hydrography_index]},")
+                        f.write("200,")  # floodplain
+                        f.write(f"{shapes[hydrography_index]},")
+                        f.write(f"{bulk_densities[hydrography_index]},")
+                        f.write(f"{porosity[hydrography_index]},")
+                        f.write(f"{organic_contents[hydrography_index]},")
+                        f.write(f"{depths_sediment_1[hydrography_index]},")
+                        f.write(f"{depths_sediment_2[hydrography_index]}\n")
+                        i = int(np.where(reaches_hydrology == reach)[0])
+                        discharge = self.inputs["WaterDischarge"].read(slices=(slice(number_time_steps), i)).values
+                        volume = self.inputs["WaterVolume"].read(slices=(slice(number_time_steps), i)).values
+                        area = self.inputs["WetSurfaceArea"].read(slices=(slice(number_time_steps), i)).values
+                        j = int(np.where(reaches_drift == reach)[0])
+                        drift_deposition = self.inputs["DriftDeposition"].read(
+                            slices=(slice(int(number_time_steps / 24)), j)).values
+                        for t in range(number_time_steps):
+                            self._timeString = (self._begin + datetime.timedelta(hours=t)).strftime(
+                                "%Y-%m-%dT%H:%M")
+                            f2.write(f"r{reach},")
+                            f2.write(f"{self._timeString},")
+                            f2.write(f"{round(float(volume[t]), 2)},")
+                            f2.write(f"{round(float(discharge[t]), 2)},")
+                            f2.write(f"{round(float(area[t]), 2)}\n")
+                            if t % 24 == 11:
+                                drift_deposition_value = drift_deposition[int((t - 11) / 24)]
+                                if drift_deposition_value > 0:
+                                    f3.write(f"r{reach},")
+                                    f3.write("CMP_A,")
+                                    f3.write(f"{self._timeString},")
+                                    f3.write(f"{format(float(drift_deposition_value), 'f')}")
+                                    f3.write("\n")
 
     def prepare_catchment_list(self, catchment_file):
         """
