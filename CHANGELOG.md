@@ -1,5 +1,15 @@
 # Changelog
-This is the changelog for the StepsRiverNetwork component. It was automatically created on 2021-10-19.
+This is the changelog for the StepsRiverNetwork component. It was automatically created on 2021-10-20.
+
+## [2.1] - 2021-10-20
+
+### Added
+
+### Changed
+- Replaced shapefile input
+
+### Fixed
+
 
 ## [2.0.7] - 2021-10-19
 
