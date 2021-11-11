@@ -17,6 +17,7 @@ class StepsRiverNetwork(base.Component):
     """
     # RELEASES
     VERSION = base.VersionCollection(
+        base.VersionInfo("2.0.5", "2021-11-11"),
         base.VersionInfo("2.0.4", "2021-09-01"),
         base.VersionInfo("2.0.3", "2021-08-27"),
         base.VersionInfo("2.0.2", "2021-07-19"),
@@ -102,11 +103,13 @@ class StepsRiverNetwork(base.Component):
     VERSION.added("2.0.3", "Base documentation")
     VERSION.changed("2.0.4", "ogr module import")
     VERSION.changed("2.0.4", "Acknowledged default access mode for HDF files")
-
+    VERSION.changed("2.0.5", "Update of Steps1234 module to  onsider drainage load.")
+    
+    
     def __init__(self, name, observer, store):
         super(StepsRiverNetwork, self).__init__(name, observer, store)
         self._module = base.Module(
-            "River network version of STEPS1234", "0.93", r"module\documentation\html\index.html")
+            "River network version of STEPS1234", "0.94", r"module\documentation\html\index.html")
         # noinspection SpellCheckingInspection
         self._inputs = base.InputContainer(self, [
             base.Input(
@@ -190,10 +193,11 @@ class StepsRiverNetwork(base.Component):
                 "DrainageLoad",
                 (
                     attrib.Class(np.ndarray, 1),
-                    attrib.Unit("mg/m2/h", 1),
+                    attrib.Unit("mg/(m²*h)", 1),
                     attrib.Scales("time/hour, space/base_geometry", 1)
                 ),
-                self.default_observer
+                self.default_observer,
+                description="The drainage load into the a water body by adjacent agricultural fields."
             ),
             base.Input(
                 "ReachesDrift",

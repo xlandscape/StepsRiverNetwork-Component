@@ -1,4 +1,4 @@
-<?xml version="0.93" encoding="UTF-8"?>
+<?xml version="0.94" encoding="UTF-8"?>
 <Info>
     <organization>knoell Germany GmbH</organization>
     <author name="Sebastian Multsch">
@@ -10,11 +10,12 @@
     <license type="GPLv3"/>
   </licenses>
   <tool-description<River network version of STEPS1234</tool-description>
-  <release-version>0.93</release-version> 
+  <release-version>0.94</release-version> 
   <release-notes>
       <release-note release-versio="0.90"> First realese. </release-note>
 	<release-note release-versio="0.91"> Added runlist. </release-note>
 	<release-note release-versio="0.92"> Various changes. </release-note>
 	<release-note release-versio="0.93"> Various changes. </release-note>
+	<release-note release-versio="0.94"> Various changes. </release-note>
   </release-notes>
 </Info>
