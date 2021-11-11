@@ -1,5 +1,45 @@
 # Changelog
-This is the changelog for the StepsRiverNetwork component. It was automatically created on 2021-09-02.
+This is the changelog for the StepsRiverNetwork component. It was automatically created on 2021-10-20.
+
+## [2.1] - 2021-10-20
+
+### Added
+
+### Changed
+- Replaced shapefile input
+
+### Fixed
+
+
+## [2.0.7] - 2021-10-19
+
+### Added
+
+### Changed
+- Specified working directory for module
+
+### Fixed
+
+
+## [2.0.6] - 2021-10-12
+
+### Added
+
+### Changed
+- Switched to Google docstring style
+
+### Fixed
+
+
+## [2.0.5] - 2021-10-11
+
+### Added
+
+### Changed
+- Replaced legacy format strings by f-strings
+
+### Fixed
+
 
 ## [2.0.4] - 2021-09-01
 

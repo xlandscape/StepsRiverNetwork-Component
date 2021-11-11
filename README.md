@@ -17,16 +17,16 @@
 ## About the project
 The component encapsulating the Steps environmental fate module.  
 This is an automatically generated documentation based on the available code and in-line documentation. The current
-version of this document is from 2021-09-02.  
+version of this document is from 2021-10-20.  
 
 ### Built with
-* Landscape Model core version 1.6
+* Landscape Model core version 1.9.4
 * River network version of STEPS1234 version 0.93 (see `module\documentation\html\index.html` for details)
 
 
 ## Getting Started
-The component can be used in any Landscape Model based on core version 1.6 or newer. See the Landscape Model
-core's `README` for general tips on how to add a component to a Landscape Model.
+The component can be used in any Landscape Model based on core version 1.9.4 or newer. See the Landscape
+Model core's `README` for general tips on how to add a component to a Landscape Model.
 
 ### Prerequisites
 A model developer that wants to add the `StepsRiverNetwork` component to a Landscape Model needs to set up the general 
@@ -44,9 +44,6 @@ The following gives a sample configuration of the `StepsRiverNetwork` component.
 ```xml
 <StepsRiverNetwork module="StepsRiverNetwork" class="StepsRiverNetwork" enabled="$(RunStepsRiverNetwork)">
 <ProcessingPath>$(_MCS_BASE_DIR_)\$(_MC_NAME_)\processing\fate\steps</ProcessingPath>
-    <Hydrography>
-<FromOutput component="LandscapeScenario" output="hydrography" />
-    </Hydrography>
 <Catchment>$(:Catchment)</Catchment>
     <WaterDischarge>
         <FromOutput component="Hydrology" output="Flow" />
@@ -85,6 +82,54 @@ unit="1">$(PlantUptake)</PlantUptake>
 unit="mg/m&#179;">$(ThresholdSW)</ThresholdSW>
     <ThresholdSediment type="float"
 unit="mg/kg">$(ThresholdSediment)</ThresholdSediment>
+    <HydrographyReaches>
+        <FromOutput
+component="LandscapeScenario" output="hydrography_id" />
+    </HydrographyReaches>
+    <HydrographyGeometries>
+<FromOutput component="LandscapeScenario" output="hydrography_geom" />
+    </HydrographyGeometries>
+<DownstreamReach>
+        <FromOutput component="LandscapeScenario" output="hydrography_downstream" />
+</DownstreamReach>
+    <InitialDepth>
+        <FromOutput component="LandscapeScenario"
+output="hydrography_initial_depth" />
+    </InitialDepth>
+    <Manning>
+        <FromOutput
+component="LandscapeScenario" output="hydrography_manning" />
+    </Manning>
+    <BankSlope>
+        <FromOutput
+component="LandscapeScenario" output="hydrography_bank_slope" />
+    </BankSlope>
+    <Width>
+        <FromOutput
+component="LandscapeScenario" output="hydrography_width" />
+    </Width>
+    <Shape>
+        <FromOutput
+component="LandscapeScenario" output="hydrography_shape" />
+    </Shape>
+    <BulkDensity>
+        <FromOutput
+component="LandscapeScenario" output="hydrography_bulk_density" />
+    </BulkDensity>
+    <Porosity>
+        <FromOutput
+component="LandscapeScenario" output="hydrography_porosity" />
+    </Porosity>
+    <OrganicContent>
+        <FromOutput
+component="LandscapeScenario" output="hydrography_organic_content" />
+    </OrganicContent>
+    <SedimentDepth1stLayer>
+<FromOutput component="LandscapeScenario" output="hydrography_sediment_layer_1_depth" />
+    </SedimentDepth1stLayer>
+<SedimentDepth2ndLayer>
+        <FromOutput component="LandscapeScenario" output="hydrography_sediment_layer_2_depth" />
+</SedimentDepth2ndLayer>
 </StepsRiverNetwork>
 ```
 
@@ -94,14 +139,6 @@ The working directory for the module. It is used for all files prepared as modul
 or generated as (temporary) module outputs.  
 `ProcessingPath` expects its values to be of type `str`.
 Values of the `ProcessingPath` input may not have a physical unit.
-Values have to refer to the `global` scale.
-
-#### Hydrography
-The spatial delineation of the hydrographic features in the simulated landscape. This
-input basically represents the flow-lines used during preparation of the hydrology. The hydrography is
-consistently for all components of the Landscape Model subdivided into individual segments (*reaches*).  
-`Hydrography` expects its values to be of type `str`.
-Values of the `Hydrography` input may not have a physical unit.
 Values have to refer to the `global` scale.
 
 #### Catchment
@@ -208,6 +245,87 @@ The physical unit of the `ThresholdSW` input values is `mg/m³`.
 The minimum sediment concentration that is reported.  
 `ThresholdSediment` expects its values to be of type `float`.
 The physical unit of the `ThresholdSediment` input values is `mg/kg`.
+
+#### HydrographyReaches
+The numerical identifiers of individual reaches in the order used by the inputs
+`HydrographyGeometries`, `DownstreamReach`, `BottomWidth`, `BankSlope`, `OrganicContent`, `BulkDensity`
+ and `Porosity`.  
+`HydrographyReaches` expects its values to be of type `list`.
+Values of the `HydrographyReaches` input may not have a physical unit.
+Values have to refer to the `space/base_geometry` scale.
+
+#### HydrographyGeometries
+The geometries of individual water body segments (reaches) in WKB representation.  
+`HydrographyGeometries` expects its values to be of type `list`.
+Values of the `HydrographyGeometries` input may not have a physical unit.
+Values have to refer to the `space/base_geometry` scale.
+
+#### DownstreamReach
+The identifier of the reach that is located downstream of the current reach.  
+`DownstreamReach` expects its values to be of type `list`.
+Values of the `DownstreamReach` input may not have a physical unit.
+Values have to refer to the `space/base_geometry` scale.
+
+#### InitialDepth
+The initial water depth of the current reach.  
+`InitialDepth` expects its values to be of type `list`.
+The physical unit of the `InitialDepth` input values is `m`.
+Values have to refer to the `space/base_geometry` scale.
+
+#### Manning
+The Manning friction number applying to the current reach.  
+`Manning` expects its values to be of type `list`.
+The physical unit of the `Manning` input values is `1`.
+Values have to refer to the `space/base_geometry` scale.
+
+#### BankSlope
+The slope of the reach.  
+`BankSlope` expects its values to be of type `list`.
+The physical unit of the `BankSlope` input values is `1`.
+Values have to refer to the `space/base_geometry` scale.
+
+#### Width
+The width of the reach (undocumented by the module).  
+`Width` expects its values to be of type `list`.
+The physical unit of the `Width` input values is `m`.
+Values have to refer to the `space/base_geometry` scale.
+
+#### Shape
+The shape of the current reach.  
+`Shape` expects its values to be of type `list`.
+Values of the `Shape` input may not have a physical unit.
+Values have to refer to the `space/base_geometry` scale.
+Allowed values are: `TriangularReach`, `RectangularReach`, `SWATReachType`.
+
+#### BulkDensity
+The mass density of the reach sediment.  
+`BulkDensity` expects its values to be of type `list`.
+The physical unit of the `BulkDensity` input values is `kg/m³`.
+Values have to refer to the `space/base_geometry` scale.
+
+#### Porosity
+The porosity of the reach sediment.  
+`Porosity` expects its values to be of type `list`.
+The physical unit of the `Porosity` input values is `m³/m³`.
+Values have to refer to the `space/base_geometry` scale.
+
+#### OrganicContent
+The amount of organic material in the sediment of the reach.  
+`OrganicContent` expects its values to be of type `list`.
+The physical unit of the `OrganicContent` input values is `g/g`.
+Values have to refer to the `space/base_geometry` scale.
+
+#### SedimentDepth1stLayer
+The depth of the first layer of sediment.  
+`SedimentDepth1stLayer` expects its values to be of type `list`.
+The physical unit of the `SedimentDepth1stLayer` input values is `m`.
+Values have to refer to the `space/base_geometry` scale.
+
+#### SedimentDepth2ndLayer
+The depth of the second layer of sediment.  
+`SedimentDepth2ndLayer` expects its values to be of type `list`.
+The physical unit of the `SedimentDepth2ndLayer` input values is `m`.
+Values have to refer to the `space/base_geometry` scale.
 
 ### Outputs
 #### PEC_SW

@@ -1,6 +1,4 @@
-"""
-Component for the Steps environmental fate module.
-"""
+"""Component for the Steps environmental fate module."""
 import datetime
 import h5py
 import numpy as np
@@ -12,9 +10,7 @@ import attrib
 
 
 class StepsRiverNetwork(base.Component):
-    """
-    The component encapsulating the Steps environmental fate module.
-    """
+    """The component encapsulating the Steps environmental fate module."""
     # RELEASES
     VERSION = base.VersionCollection(
         base.VersionInfo("2.0.5", "2021-11-11"),
@@ -107,6 +103,14 @@ class StepsRiverNetwork(base.Component):
     
     
     def __init__(self, name, observer, store):
+        """
+        Initializes a StepsRiverNetwork component.
+
+        Args:
+            name: The name of the component.
+            observer: The default observer of the component.
+            store: The default store of the component.
+        """
         super(StepsRiverNetwork, self).__init__(name, observer, store)
         self._module = base.Module(
             "River network version of STEPS1234", "0.94", r"module\documentation\html\index.html")
@@ -118,15 +122,6 @@ class StepsRiverNetwork(base.Component):
                 self.default_observer,
                 description="""The working directory for the module. It is used for all files prepared as module inputs
                 or generated as (temporary) module outputs."""
-            ),
-            base.Input(
-                "Hydrography",
-                (attrib.Class(str, 1), attrib.Unit(None, 1), attrib.Scales("global", 1)),
-                self.default_observer,
-                description="""The spatial delineation of the hydrographic features in the simulated landscape. This
-                input basically represents the flow-lines used during preparation of the hydrology. The hydrography is
-                consistently for all components of the Landscape Model subdivided into individual segments (*reaches*).
-                """
             ),
             base.Input(
                 "Catchment",
@@ -268,6 +263,91 @@ class StepsRiverNetwork(base.Component):
                 (attrib.Class(float, 1), attrib.Unit("mg/kg", 1)),
                 self.default_observer,
                 description="The minimum sediment concentration that is reported."
+            ),
+            base.Input(
+                "HydrographyReaches",
+                (attrib.Class(list[int]), attrib.Unit(None), attrib.Scales("space/base_geometry")),
+                self.default_observer,
+                description="""The numerical identifiers of individual reaches in the order used by the inputs
+                `HydrographyGeometries`, `DownstreamReach`, `BottomWidth`, `BankSlope`, `OrganicContent`, `BulkDensity`
+                 and `Porosity`."""
+            ),
+            base.Input(
+                "HydrographyGeometries",
+                (attrib.Class(list[bytes]), attrib.Unit(None), attrib.Scales("space/base_geometry")),
+                self.default_observer,
+                description="The geometries of individual water body segments (reaches) in WKB representation."
+            ),
+            base.Input(
+                "DownstreamReach",
+                (attrib.Class(list[str]), attrib.Unit(None), attrib.Scales("space/base_geometry")),
+                self.default_observer,
+                description="The identifier of the reach that is located downstream of the current reach."
+            ),
+            base.Input(
+                "InitialDepth",
+                (attrib.Class(list[float]), attrib.Unit("m"), attrib.Scales("space/base_geometry")),
+                self.default_observer,
+                description="The initial water depth of the current reach."
+            ),
+            base.Input(
+                "Manning",
+                (attrib.Class(list[float]), attrib.Unit("1"), attrib.Scales("space/base_geometry")),
+                self.default_observer,
+                description="The Manning friction number applying to the current reach."
+            ),
+            base.Input(
+                "BankSlope",
+                (attrib.Class(list[float]), attrib.Unit("1"), attrib.Scales("space/base_geometry")),
+                self.default_observer,
+                description="The slope of the reach."
+            ),
+            base.Input(
+                "Width",
+                (attrib.Class(list[float]), attrib.Unit("m"), attrib.Scales("space/base_geometry")),
+                self.default_observer,
+                description="The width of the reach (undocumented by the module)."
+            ),
+            base.Input(
+                "Shape",
+                (
+                    attrib.Class(list[str]),
+                    attrib.Unit(None),
+                    attrib.Scales("space/base_geometry"),
+                    attrib.InList(("TriangularReach", "RectangularReach", "SWATReachType"))
+                ),
+                self.default_observer,
+                description="The shape of the current reach."
+            ),
+            base.Input(
+                "BulkDensity",
+                (attrib.Class(list[float]), attrib.Unit("kg/m³"), attrib.Scales("space/base_geometry")),
+                self.default_observer,
+                description="The mass density of the reach sediment."
+            ),
+            base.Input(
+                "Porosity",
+                (attrib.Class(list[float]), attrib.Unit("m³/m³"), attrib.Scales("space/base_geometry")),
+                self.default_observer,
+                description="The porosity of the reach sediment."
+            ),
+            base.Input(
+                "OrganicContent",
+                (attrib.Class(list[float]), attrib.Unit("g/g"), attrib.Scales("space/base_geometry")),
+                self.default_observer,
+                description="The amount of organic material in the sediment of the reach."
+            ),
+            base.Input(
+                "SedimentDepth1stLayer",
+                (attrib.Class(list[float]), attrib.Unit("m"), attrib.Scales("space/base_geometry")),
+                self.default_observer,
+                description="The depth of the first layer of sediment."
+            ),
+            base.Input(
+                "SedimentDepth2ndLayer",
+                (attrib.Class(list[float]), attrib.Unit("m"), attrib.Scales("space/base_geometry")),
+                self.default_observer,
+                description="The depth of the second layer of sediment."
             )
         ])
         self._outputs = base.OutputContainer(self, [
@@ -347,12 +427,13 @@ class StepsRiverNetwork(base.Component):
         ])
         self._begin = None
         self._timeString = None
-        return
 
     def run(self):
         """
         Runs the component.
-        :return: Nothing.
+
+        Returns:
+            Nothing.
         """
         self.default_observer.write_message(2, "Component relies on insensible high precision of z-coordinate")
         project_name = "h1"
@@ -368,28 +449,32 @@ class StepsRiverNetwork(base.Component):
         self.prepare_substance_list(os.path.join(project_path, "SubstanceList.csv"))
         self.run_project(processing_path, project_name)
         self.read_outputs(os.path.join(project_path, "h1_reaches.h5"))
-        return
 
     def prepare_project_list(self, processing_path, project_name):
         """
         Prepares th project list.
-        :param processing_path: The working directory of the module.
-        :param project_name: The name of the module project.
-        :return: Nothing.
+
+        Args:
+            processing_path: The working directory of the module.
+            project_name: The name of the module project.
+
+        Returns:
+            Nothing.
         """
-        project_list_file = os.path.join(processing_path, project_name + ".csv")
+        project_list_file = os.path.join(processing_path, f"{project_name}.csv")
         with open(project_list_file, "w") as f:
             # noinspection SpellCheckingInspection
             f.write(
-                "key,fpath,database,begin,end,t_input_start,timestep_input,timestep_simulation,timestep_output," +
-                "aggregation_output,withHydro,write_summary,substance,simulation,preprocessing,postprocessing," +
-                "MASS_SW,MASS_SED,MASS_SED_DEEP,PEC_SW,PEC_SED,threshold_sw,threshold_sed\n")
-            f.write(project_name + ",")  # key
-            f.write(processing_path + ",")  # file path
+                "key,fpath,database,begin,end,t_input_start,timestep_input,timestep_simulation,timestep_output,"
+                "aggregation_output,withHydro,write_summary,substance,simulation,preprocessing,postprocessing,"
+                "MASS_SW,MASS_SED,MASS_SED_DEEP,PEC_SW,PEC_SED,threshold_sw,threshold_sed\n"
+            )
+            f.write(f"{project_name},")
+            f.write(f"{processing_path},")
             f.write("csv,")  # database
-            f.write(self._begin.strftime("%Y-%m-%dT%H:%M") + ",")  # begin
-            f.write(self._timeString + ",")  # end
-            f.write(self._begin.strftime("%Y-%m-%dT%H:%M") + ",")  # t_input_start
+            f.write(f"{self._begin.strftime('%Y-%m-%dT%H:%M')},")
+            f.write(f"{self._timeString},")
+            f.write(f"{self._begin.strftime('%Y-%m-%dT%H:%M')},")
             f.write("1H,")  # time step input
             f.write("1Min,")  # time step simulation
             f.write("1H,")  # time step output
@@ -405,33 +490,46 @@ class StepsRiverNetwork(base.Component):
             f.write("TRUE,")  # *MASS_SED_DEEP
             f.write("TRUE,")  # PEC_SW
             f.write("TRUE,")  # PEC_SED
-            f.write(str(self.inputs["ThresholdSW"].read().values) + ",")  # threshold_sw
-            f.write(str(self.inputs["ThresholdSediment"].read().values) + "\n")  # threshold_sed
-        return
+            f.write(f"{self.inputs['ThresholdSW'].read().values},")
+            f.write(f"{self.inputs['ThresholdSediment'].read().values}\n")
 
     def prepare_reaches_and_drift_deposition(self, reaches_file, reach_list_file, spray_drift_file,drainage_list_file):
         """
         Prepares the reaches and drift deposition inputs.
-        :param reaches_file: The file path of the reach file.
-        :param reach_list_file: The file path of the reach list file.
-        :param spray_drift_file: The file path of the spray-drift file.
-        :return: Nothing.
+
+        Args:
+            reaches_file: The file path of the reach file.
+            reach_list_file: The file path of the reach list file.
+            spray_drift_file: The file path of the spray-drift file.
+
+        Returns:
+            Nothing.
         """
-        hydrography = self.inputs["Hydrography"].read().values
         reaches_hydrology = self.inputs["ReachesHydrology"].read().values
         self._begin = self.inputs["TimeSeriesStart"].read().values
         number_time_steps = self.inputs["WaterDischarge"].describe()["shape"][0]
         reaches_drift = self.inputs["ReachesDrift"].read().values
-        driver = ogr.GetDriverByName("ESRI Shapefile")
-        data_source = driver.Open(hydrography, 0)
-        layer = data_source.GetLayer()
-        reaches_sorted = [int(r[1:]) for r in sorted(["r" + str(r) for r in reaches_hydrology])]
+        reaches_sorted = [int(r[1:]) for r in sorted([f"r{r}" for r in reaches_hydrology])]
+        hydrography_reaches = self.inputs["HydrographyReaches"].read().values
+        hydrography_geometries = self.inputs["HydrographyGeometries"].read().values
+        downstream_reaches = self.inputs["DownstreamReach"].read().values
+        initial_depths = self.inputs["InitialDepth"].read().values
+        manning = self.inputs["Manning"].read().values
+        bank_slopes = self.inputs["BankSlope"].read().values
+        widths = self.inputs["Width"].read().values
+        shapes = self.inputs["Shape"].read().values
+        bulk_densities = self.inputs["BulkDensity"].read().values
+        porosity = self.inputs["Porosity"].read().values
+        organic_contents = self.inputs["OrganicContent"].read().values
+        depths_sediment_1 = self.inputs["SedimentDepth1stLayer"].read().values
+        depths_sediment_2 = self.inputs["SedimentDepth2ndLayer"].read().values
         self.outputs["Reaches"].set_values(reaches_sorted)
         with open(reach_list_file, "w") as f:
             # noinspection SpellCheckingInspection
             f.write(
-                "key,x,y,z,downstream,initial_depth,manning_n,bankslope,bottomwidth,floodplainslope,shape,dens," +
-                "porosity,oc,depth_sed,depth_sed_deep\n")
+                "key,x,y,z,downstream,initial_depth,manning_n,bankslope,bottomwidth,floodplainslope,shape,dens,"
+                "porosity,oc,depth_sed,depth_sed_deep\n"
+            )
             with open(reaches_file, "w") as f2:
                 f2.write("key,time,volume,flow,area\n")
                 with open(spray_drift_file, "w") as f3:
@@ -506,57 +604,66 @@ class StepsRiverNetwork(base.Component):
     def prepare_catchment_list(self, catchment_file):
         """
         Prepares the catchment list.
-        :param catchment_file: The file path of the catchment list.
-        :return: Nothing.
+
+        Args:
+            catchment_file: The file path of the catchment list.
+
+        Returns:
+            Nothing.
         """
         shutil.copyfile(self.inputs["Catchment"].read().values, catchment_file)
-        return
 
     def run_project(self, processing_path, project_name):
         """
         Runs the module project.
-        :param processing_path: The working directory for the module.
-        :param project_name: The name of the module project.
-        :return: Nothing.
+
+        Args:
+            processing_path: The working directory for the module.
+            project_name: The name of the module project.
+
+        Returns:
+            Nothing.
         """
         python_exe = os.path.join(os.path.dirname(__file__), "module", "bin", "python", "python.exe")
         python_script = os.path.join(os.path.dirname(__file__), "module", "bin", "main.py")
         # noinspection SpellCheckingInspection
         base.run_process(
             (python_exe, python_script, "--folder", processing_path, "--runlist", project_name),
-            None,
+            processing_path,
             self.default_observer,
             {"HOMEPATH": processing_path}
         )
-        return
 
     def prepare_substance_list(self, substance_list_file):
         """
         Prepares the substance list.
-        :param substance_list_file: The file path of the substance list.
-        :return: Nothing.
+
+        Args:
+            substance_list_file: The file path of the substance list.
+
+        Returns:
+            Nothing.
         """
         with open(substance_list_file, "w") as f:
             # noinspection SpellCheckingInspection
             f.write("key,molarmass,DT50sw,DT50sed,KOC,Temp0,Q10,plantuptake,QFAC\n")
             # noinspection SpellCheckingInspection
-            f.write("CMP_A,{},{},{},{},{},{},{},{}\n".format(
-                self.inputs["MolarMass"].read().values,
-                self.inputs["DT50sw"].read().values,
-                self.inputs["DT50sed"].read().values,
-                self.inputs["KOC"].read().values,
-                self.inputs["Temp0"].read().values,
-                self.inputs["Q10"].read().values,
-                self.inputs["PlantUptake"].read().values,
-                self.inputs["QFac"].read().values
-            ))
-        return
+            f.write(
+                f"CMP_A,{self.inputs['MolarMass'].read().values},{self.inputs['DT50sw'].read().values},"
+                f"{self.inputs['DT50sed'].read().values},{self.inputs['KOC'].read().values},"
+                f"{self.inputs['Temp0'].read().values},{self.inputs['Q10'].read().values},"
+                f"{self.inputs['PlantUptake'].read().values},{self.inputs['QFac'].read().values}\n"
+            )
 
     def read_outputs(self, output_file):
         """
         Reads the module outputs into the landscape model.
-        :param output_file: The file path of the module output file.
-        :return: Nothing.
+
+        Args:
+            output_file: The file path of the module output file.
+
+        Returns:
+            Nothing.
         """
         with h5py.File(output_file) as f:
             for variable in [
@@ -566,7 +673,7 @@ class StepsRiverNetwork(base.Component):
                 ("MASS_SED_DEEP", "mg"),
                 ("PEC_SED", "mg/m³")
             ]:
-                data = f["/" + variable[0]]
+                data = f[f"/{variable[0]}"]
                 self.outputs[variable[0]].set_values(
                     np.ndarray,
                     shape=data.shape,
@@ -575,4 +682,3 @@ class StepsRiverNetwork(base.Component):
                 )
                 for chunk in base.chunk_slices(data.shape, (min(262144, data.shape[0]), 1)):
                     self.outputs[variable[0]].set_values(data[chunk], slices=chunk, create=False, calculate_max=True)
-        return
