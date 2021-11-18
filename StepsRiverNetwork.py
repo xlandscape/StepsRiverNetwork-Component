@@ -13,6 +13,7 @@ class StepsRiverNetwork(base.Component):
     """The component encapsulating the Steps environmental fate module."""
     # RELEASES
     VERSION = base.VersionCollection(
+        base.VersionInfo("2.1.1", "2021-11-18"),
         base.VersionInfo("2.1.0", "2021-10-20"),
         base.VersionInfo("2.0.7", "2021-10-19"),
         base.VersionInfo("2.0.6", "2021-10-12"),
@@ -106,6 +107,8 @@ class StepsRiverNetwork(base.Component):
     VERSION.changed("2.0.6", "Switched to Google docstring style")
     VERSION.changed("2.0.7", "Specified working directory for module")
     VERSION.changed("2.1.0", "Replaced shapefile input")
+    VERSION.changed("2.1.1", "Removed reaches inputs")
+    VERSION.changed("2.1.1", "Reports element names of outputs")
 
     def __init__(self, name, observer, store):
         """

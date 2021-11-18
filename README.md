@@ -17,15 +17,15 @@
 ## About the project
 The component encapsulating the Steps environmental fate module.  
 This is an automatically generated documentation based on the available code and in-line documentation. The current
-version of this document is from 2021-10-20.  
+version of this document is from 2021-11-18.  
 
 ### Built with
-* Landscape Model core version 1.9.4
+* Landscape Model core version 1.10
 * River network version of STEPS1234 version 0.93 (see `module\documentation\html\index.html` for details)
 
 
 ## Getting Started
-The component can be used in any Landscape Model based on core version 1.9.4 or newer. See the Landscape
+The component can be used in any Landscape Model based on core version 1.10 or newer. See the Landscape
 Model core's `README` for general tips on how to add a component to a Landscape Model.
 
 ### Prerequisites
@@ -43,11 +43,13 @@ The following gives a sample configuration of the `StepsRiverNetwork` component.
 [outputs](#outputs) for further details on the component's interface.
 ```xml
 <StepsRiverNetwork module="StepsRiverNetwork" class="StepsRiverNetwork" enabled="$(RunStepsRiverNetwork)">
-<ProcessingPath>$(_MCS_BASE_DIR_)\$(_MC_NAME_)\processing\fate\steps</ProcessingPath>
-<Catchment>$(:Catchment)</Catchment>
+<ProcessingPath scales="global">$(_MCS_BASE_DIR_)\$(_MC_NAME_)\processing\fate\steps</ProcessingPath>
+    <Catchment
+scales="global">$(:Catchment)</Catchment>
     <WaterDischarge>
-        <FromOutput component="Hydrology" output="Flow" />
-</WaterDischarge>
+        <FromOutput component="Hydrology" output="Flow"
+/>
+    </WaterDischarge>
     <TimeSeriesStart>
         <FromOutput component="Hydrology" output="TimeSeriesStart" />
 </TimeSeriesStart>
@@ -63,50 +65,42 @@ The following gives a sample configuration of the `StepsRiverNetwork` component.
     <DriftDeposition>
 <FromOutput component="DepositionToReach" output="Deposition" />
     </DriftDeposition>
-    <ReachesDrift>
-<FromOutput component="DepositionToReach" output="Reaches" />
-    </ReachesDrift>
     <MolarMass type="float"
-unit="g/mol">$(MolarMass)</MolarMass>
-    <DT50sw type="float" unit="d">$(DT50sw)</DT50sw>
-    <DT50sed type="float"
-unit="d">$(DT50sed)</DT50sed>
-    <KOC type="float" unit="l/kg">$(KOC)</KOC>
-    <Temp0 type="float"
-unit="&#176;C">$(Temp0)</Temp0>
-    <Q10 type="float" unit="1">$(Q10)</Q10>
-    <PlantUptake type="float"
-unit="1">$(PlantUptake)</PlantUptake>
-    <QFac type="float" unit="1">$(QFac)</QFac>
-    <ThresholdSW type="float"
-unit="mg/m&#179;">$(ThresholdSW)</ThresholdSW>
-    <ThresholdSediment type="float"
-unit="mg/kg">$(ThresholdSediment)</ThresholdSediment>
-    <HydrographyReaches>
-        <FromOutput
-component="LandscapeScenario" output="hydrography_id" />
-    </HydrographyReaches>
+unit="g/mol" scales="global">$(MolarMass)</MolarMass>
+    <DT50sw type="float" unit="d"
+scales="global">$(DT50sw)</DT50sw>
+    <DT50sed type="float" unit="d" scales="global">$(DT50sed)</DT50sed>
+    <KOC
+type="float" unit="l/kg" scales="global">$(KOC)</KOC>
+    <Temp0 type="float" unit="&#176;C"
+scales="global">$(Temp0)</Temp0>
+    <Q10 type="float" unit="1" scales="global">$(Q10)</Q10>
+    <PlantUptake
+type="float" unit="1" scales="global">$(PlantUptake)</PlantUptake>
+    <QFac type="float" unit="1"
+scales="global">$(QFac)</QFac>
+    <ThresholdSW type="float" unit="mg/m&#179;"
+scales="global">$(ThresholdSW)</ThresholdSW>
+    <ThresholdSediment type="float" unit="mg/kg"
+scales="global">$(ThresholdSediment)</ThresholdSediment>
     <HydrographyGeometries>
-<FromOutput component="LandscapeScenario" output="hydrography_geom" />
+        <FromOutput
+component="LandscapeScenario" output="hydrography_geom" />
     </HydrographyGeometries>
-<DownstreamReach>
-        <FromOutput component="LandscapeScenario" output="hydrography_downstream" />
-</DownstreamReach>
+    <DownstreamReach>
+<FromOutput component="LandscapeScenario" output="hydrography_downstream" />
+    </DownstreamReach>
     <InitialDepth>
-        <FromOutput component="LandscapeScenario"
-output="hydrography_initial_depth" />
+<FromOutput component="LandscapeScenario" output="hydrography_initial_depth" />
     </InitialDepth>
     <Manning>
-        <FromOutput
-component="LandscapeScenario" output="hydrography_manning" />
+<FromOutput component="LandscapeScenario" output="hydrography_manning" />
     </Manning>
     <BankSlope>
-        <FromOutput
-component="LandscapeScenario" output="hydrography_bank_slope" />
+<FromOutput component="LandscapeScenario" output="hydrography_bank_slope" />
     </BankSlope>
     <Width>
-        <FromOutput
-component="LandscapeScenario" output="hydrography_width" />
+<FromOutput component="LandscapeScenario" output="hydrography_width" />
     </Width>
     <Shape>
         <FromOutput
@@ -186,13 +180,6 @@ The average drift deposition onto the surface of a water body.
 The physical unit of the `DriftDeposition` input values is `mg/m²`.
 Values have to refer to the `time/day, space/reach` scale.
 
-#### ReachesDrift
-The numeric identifiers for individual reaches (in the order of the `DriftDeposition` 
-input) that apply scenario-wide.  
-`ReachesDrift` expects its values to be of type `ndarray`.
-Values of the `ReachesDrift` input may not have a physical unit.
-Values have to refer to the `space/reach` scale.
-
 #### MolarMass
 The molar mass of the substance depositing at the water body surface.  
 `MolarMass` expects its values to be of type `float`.
@@ -245,14 +232,6 @@ The physical unit of the `ThresholdSW` input values is `mg/m³`.
 The minimum sediment concentration that is reported.  
 `ThresholdSediment` expects its values to be of type `float`.
 The physical unit of the `ThresholdSediment` input values is `mg/kg`.
-
-#### HydrographyReaches
-The numerical identifiers of individual reaches in the order used by the inputs
-`HydrographyGeometries`, `DownstreamReach`, `BottomWidth`, `BankSlope`, `OrganicContent`, `BulkDensity`
- and `Porosity`.  
-`HydrographyReaches` expects its values to be of type `list`.
-Values of the `HydrographyReaches` input may not have a physical unit.
-Values have to refer to the `space/base_geometry` scale.
 
 #### HydrographyGeometries
 The geometries of individual water body segments (reaches) in WKB representation.  
