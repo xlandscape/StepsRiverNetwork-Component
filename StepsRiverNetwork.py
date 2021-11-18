@@ -190,13 +190,6 @@ class StepsRiverNetwork(base.Component):
                 description="The average drift deposition onto the surface of a water body."
             ),
             base.Input(
-                "ReachesDrift",
-                (attrib.Class(np.ndarray, 1), attrib.Unit(None, 1), attrib.Scales("space/reach", 1)),
-                self.default_observer,
-                description="""The numeric identifiers for individual reaches (in the order of the `DriftDeposition` 
-                input) that apply scenario-wide."""
-            ),
-            base.Input(
                 "MolarMass",
                 (attrib.Class(float, 1), attrib.Unit("g/mol", 1)),
                 self.default_observer,
@@ -258,14 +251,6 @@ class StepsRiverNetwork(base.Component):
                 (attrib.Class(float, 1), attrib.Unit("mg/kg", 1)),
                 self.default_observer,
                 description="The minimum sediment concentration that is reported."
-            ),
-            base.Input(
-                "HydrographyReaches",
-                (attrib.Class(list[int]), attrib.Unit(None), attrib.Scales("space/base_geometry")),
-                self.default_observer,
-                description="""The numerical identifiers of individual reaches in the order used by the inputs
-                `HydrographyGeometries`, `DownstreamReach`, `BottomWidth`, `BankSlope`, `OrganicContent`, `BulkDensity`
-                 and `Porosity`."""
             ),
             base.Input(
                 "HydrographyGeometries",
@@ -504,10 +489,10 @@ class StepsRiverNetwork(base.Component):
         reaches_hydrology = self.inputs["ReachesHydrology"].read().values
         self._begin = self.inputs["TimeSeriesStart"].read().values
         number_time_steps = self.inputs["WaterDischarge"].describe()["shape"][0]
-        reaches_drift = self.inputs["ReachesDrift"].read().values
+        reaches_drift = self.inputs["DriftDeposition"].describe()["element_names"][1].get_values()
         reaches_sorted = [int(r[1:]) for r in sorted([f"r{r}" for r in reaches_hydrology])]
-        hydrography_reaches = self.inputs["HydrographyReaches"].read().values
-        hydrography_geometries = self.inputs["HydrographyGeometries"].read().values
+        hydrography_geometries = self.inputs["HydrographyGeometries"].read()
+        hydrography_reaches = hydrography_geometries.element_names[0].get_values()
         downstream_reaches = self.inputs["DownstreamReach"].read().values
         initial_depths = self.inputs["InitialDepth"].read().values
         manning = self.inputs["Manning"].read().values
@@ -519,7 +504,7 @@ class StepsRiverNetwork(base.Component):
         organic_contents = self.inputs["OrganicContent"].read().values
         depths_sediment_1 = self.inputs["SedimentDepth1stLayer"].read().values
         depths_sediment_2 = self.inputs["SedimentDepth2ndLayer"].read().values
-        self.outputs["Reaches"].set_values(reaches_sorted)
+        self.outputs["Reaches"].set_values(reaches_sorted, element_names=(self.outputs["Reaches"],))
         with open(reach_list_file, "w") as f:
             # noinspection SpellCheckingInspection
             f.write(
@@ -532,7 +517,7 @@ class StepsRiverNetwork(base.Component):
                     f3.write("key,substance,time,rate\n")
                     for reach in reaches_sorted:
                         hydrography_index = hydrography_reaches.index(reach)
-                        geom = ogr.CreateGeometryFromWkb(hydrography_geometries[hydrography_index])
+                        geom = ogr.CreateGeometryFromWkb(hydrography_geometries.values[hydrography_index])
                         coord = geom.GetPoint(0)
                         downstream = downstream_reaches[hydrography_index]
                         f.write(f"r{reach},")
@@ -652,7 +637,8 @@ class StepsRiverNetwork(base.Component):
                     np.ndarray,
                     shape=data.shape,
                     chunks=(min(262144, data.shape[0]), 1),
-                    unit=variable[1]
+                    unit=variable[1],
+                    element_names=(None, self.outputs["Reaches"])
                 )
                 for chunk in base.chunk_slices(data.shape, (min(262144, data.shape[0]), 1)):
                     self.outputs[variable[0]].set_values(data[chunk], slices=chunk, create=False, calculate_max=True)
