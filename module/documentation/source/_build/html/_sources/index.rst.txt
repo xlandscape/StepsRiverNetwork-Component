@@ -76,15 +76,7 @@ SprayDriftList
 
 .. figure:: /_static/data_input_SprayDriftList.png
     :align: center
-    :figclass: align-center
-
-DrainageList
--------------------------------
-
-.. figure:: /_static/data_input_DrainageList.png
-    :align: center
     :figclass: align-center 
-
 
 HydroList
 -------------------------------

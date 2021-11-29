@@ -2,7 +2,7 @@
 """
 .. module:: STEPSRiverNetwork
    :synopsis: A river network version of Steps1234 (Klein, 2007).
-.. moduleauthor:: Sebastian Multsch, 2021 <smultschw@knoell.com>
+.. moduleauthor:: Sebastian Multsch <smultschw@knoell.com>
 
 """
 
