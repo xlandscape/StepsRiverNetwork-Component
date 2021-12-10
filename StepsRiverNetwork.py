@@ -641,7 +641,8 @@ class StepsRiverNetwork(base.Component):
                     shape=data.shape,
                     chunks=(min(262144, data.shape[0]), 1),
                     unit=variable[1],
-                    element_names=(None, self.outputs["Reaches"])
+                    element_names=(None, self.outputs["Reaches"]),
+                    offset=(self._begin, None)
                 )
                 for chunk in base.chunk_slices(data.shape, (min(262144, data.shape[0]), 1)):
                     self.outputs[variable[0]].set_values(data[chunk], slices=chunk, create=False, calculate_max=True)
