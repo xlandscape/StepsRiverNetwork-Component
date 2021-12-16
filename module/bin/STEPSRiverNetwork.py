@@ -157,6 +157,12 @@ class STEPSRiverNetwork:
                                                    "SprayDriftList.csv"))
         self.create_spraydrift()    
     
+        # drainge
+        self.drainage = pd.read_csv(os.path.join(self.fpath,
+                                                   "DrainageList.csv"))        
+        self.add_drainage()
+    
+    
         # get geometry    
         rl_sort =  self.reachlist.sort_values("key")
         self.length = self.get_flowwidths()
@@ -364,6 +370,24 @@ class STEPSRiverNetwork:
                 #calculate flow width               
             flowwidth.append(np.sqrt((x2-x1)**2 + (y2-y1)**2))
         return np.array(flowwidth,dtype=np.float32)
+
+
+    def add_drainage(self):
+        """
+        Adds draine to mass input array
+        
+        :returns: -
+        :rtype: -        
+        """
+        # set connections
+        for i in range(len(self.drainage)):    
+            event = self.drainage.iloc[i]
+            # get reach index
+            rind = self.reachnames.index(event.key)
+            # get time index
+            tind = self.time_input.index(pd.Timestamp(event.time))
+            self.input_sw[tind,rind] = event.rate        
+        
     
     def create_spraydrift(self):
         """
