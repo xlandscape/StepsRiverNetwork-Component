@@ -17,16 +17,12 @@ class StepsRiverNetwork(base.Component):
     """
     # RELEASES
     VERSION = base.VersionCollection(
-<<<<<<< HEAD
         base.VersionInfo("2.1.2", "2021-12-10"),
         base.VersionInfo("2.1.1", "2021-11-18"),
         base.VersionInfo("2.1.0", "2021-10-20"),
         base.VersionInfo("2.0.7", "2021-10-19"),
         base.VersionInfo("2.0.6", "2021-10-12"),
         base.VersionInfo("2.0.5", "2021-10-11"),
-=======
-        base.VersionInfo("2.0.5", "2021-09-01"),
->>>>>>> origin/integration_drainage
         base.VersionInfo("2.0.4", "2021-09-01"),
         base.VersionInfo("2.0.3", "2021-08-27"),
         base.VersionInfo("2.0.2", "2021-07-19"),
@@ -112,7 +108,6 @@ class StepsRiverNetwork(base.Component):
     VERSION.added("2.0.3", "Base documentation")
     VERSION.changed("2.0.4", "ogr module import")
     VERSION.changed("2.0.4", "Acknowledged default access mode for HDF files")
-<<<<<<< HEAD
     VERSION.changed("2.0.5", "Replaced legacy format strings by f-strings")
     VERSION.changed("2.0.6", "Switched to Google docstring style")
     VERSION.changed("2.0.7", "Specified working directory for module")
@@ -121,10 +116,6 @@ class StepsRiverNetwork(base.Component):
     VERSION.changed("2.1.1", "Reports element names of outputs")
     VERSION.changed("2.1.2", "Specifies offset of outputs")
 
-=======
-    VERSION.changed("2.0.4", "Drainage added")
-    
->>>>>>> origin/integration_drainage
     def __init__(self, name, observer, store):
         super(StepsRiverNetwork, self).__init__(name, observer, store)
         self._module = base.Module(
@@ -208,8 +199,6 @@ class StepsRiverNetwork(base.Component):
                 description="The average drift deposition onto the surface of a water body."
             ),
             base.Input(
-<<<<<<< HEAD
-=======
                 "DrainageLoad",
                 (
                     attrib.Class(np.ndarray, 1),
@@ -226,7 +215,6 @@ class StepsRiverNetwork(base.Component):
                 input) that apply scenario-wide."""
             ),
             base.Input(
->>>>>>> origin/integration_drainage
                 "MolarMass",
                 (attrib.Class(float, 1), attrib.Unit("g/mol", 1)),
                 self.default_observer,
@@ -288,7 +276,6 @@ class StepsRiverNetwork(base.Component):
                 (attrib.Class(float, 1), attrib.Unit("mg/kg", 1)),
                 self.default_observer,
                 description="The minimum sediment concentration that is reported."
-<<<<<<< HEAD
             ),
             base.Input(
                 "HydrographyGeometries",
@@ -366,8 +353,6 @@ class StepsRiverNetwork(base.Component):
                 (attrib.Class(list[float]), attrib.Unit("m"), attrib.Scales("space/base_geometry")),
                 self.default_observer,
                 description="The depth of the second layer of sediment."
-=======
->>>>>>> origin/integration_drainage
             )
         ])
         self._outputs = base.OutputContainer(self, [
@@ -521,7 +506,6 @@ class StepsRiverNetwork(base.Component):
         reaches_hydrology = self.inputs["ReachesHydrology"].read().values
         self._begin = self.inputs["TimeSeriesStart"].read().values
         number_time_steps = self.inputs["WaterDischarge"].describe()["shape"][0]
-<<<<<<< HEAD
         reaches_drift = self.inputs["DriftDeposition"].describe()["element_names"][1].get_values()
         reaches_sorted = [int(r[1:]) for r in sorted([f"r{r}" for r in reaches_hydrology])]
         hydrography_geometries = self.inputs["HydrographyGeometries"].read()
@@ -538,14 +522,12 @@ class StepsRiverNetwork(base.Component):
         depths_sediment_1 = self.inputs["SedimentDepth1stLayer"].read().values
         depths_sediment_2 = self.inputs["SedimentDepth2ndLayer"].read().values
         self.outputs["Reaches"].set_values(reaches_sorted, element_names=(self.outputs["Reaches"],))
-=======
-        reaches_drift = self.inputs["ReachesDrift"].read().values
+        #reaches_drift = self.inputs["ReachesDrift"].read().values
         driver = ogr.GetDriverByName("ESRI Shapefile")
         data_source = driver.Open(hydrography, 0)
         layer = data_source.GetLayer()
         reaches_sorted = [int(r[1:]) for r in sorted(["r" + str(r) for r in reaches_hydrology])]
-        self.outputs["Reaches"].set_values(reaches_sorted)
->>>>>>> origin/integration_drainage
+        #self.outputs["Reaches"].set_values(reaches_sorted)
         with open(reach_list_file, "w") as f:
             # noinspection SpellCheckingInspection
             f.write(
@@ -555,7 +537,6 @@ class StepsRiverNetwork(base.Component):
                 f2.write("key,time,volume,flow,area\n")
                 with open(spray_drift_file, "w") as f3:
                     f3.write("key,substance,time,rate\n")
-<<<<<<< HEAD
                     for reach in reaches_sorted:
                         hydrography_index = hydrography_reaches.index(reach)
                         geom = ogr.CreateGeometryFromWkb(hydrography_geometries.values[hydrography_index])
@@ -600,7 +581,6 @@ class StepsRiverNetwork(base.Component):
                                     f3.write(f"{self._timeString},")
                                     f3.write(f"{format(float(drift_deposition_value), 'f')}")
                                     f3.write("\n")
-=======
                     with open(drainage_list_file, "w") as f4:
                         f4.write("key,substance,time,rate\n")
                         for reach in reaches_sorted:
@@ -667,7 +647,6 @@ class StepsRiverNetwork(base.Component):
                                         
                         layer.ResetReading()
         return
->>>>>>> origin/integration_drainage
 
     def prepare_catchment_list(self, catchment_file):
         """
