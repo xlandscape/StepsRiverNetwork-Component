@@ -526,9 +526,7 @@ class StepsRiverNetwork(base.Component):
                         coord = geom.GetPoint(0)
                         downstream = downstream_reaches[hydrography_index]
                         f.write(f"r{reach},")
-                        f.write(f"{round(coord[0], 2)},")
-                        f.write(f"{round(coord[1], 2)},")
-                        f.write(f"{round(coord[2], 8)},")
+                        f.write(f"{round(coord[0], 2)},{round(coord[1], 2)},{round(coord[2], 8)},")
                         f.write(f"{'' if downstream == 'Outlet' else 'r'}{downstream},")
                         f.write(f"{initial_depths[hydrography_index]},")
                         f.write(f"{manning[hydrography_index]},")
@@ -598,6 +596,7 @@ class StepsRiverNetwork(base.Component):
             {"HOMEPATH": processing_path}
         )
 
+    # noinspection DuplicatedCode
     def prepare_substance_list(self, substance_list_file):
         """
         Prepares the substance list.
