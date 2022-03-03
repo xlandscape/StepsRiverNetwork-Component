@@ -13,6 +13,7 @@ class StepsRiverNetwork(base.Component):
     """The component encapsulating the Steps environmental fate module."""
     # RELEASES
     VERSION = base.VersionCollection(
+        base.VersionInfo("2.1.3", "2022-03-03"),
         base.VersionInfo("2.1.2", "2021-12-10"),
         base.VersionInfo("2.1.1", "2021-11-18"),
         base.VersionInfo("2.1.0", "2021-10-20"),
@@ -111,6 +112,7 @@ class StepsRiverNetwork(base.Component):
     VERSION.changed("2.1.1", "Removed reaches inputs")
     VERSION.changed("2.1.1", "Reports element names of outputs")
     VERSION.changed("2.1.2", "Specifies offset of outputs")
+    VERSION.changed("2.1.3", "Mitigated weak code warnings")
 
     def __init__(self, name, observer, store):
         """
@@ -526,9 +528,7 @@ class StepsRiverNetwork(base.Component):
                         coord = geom.GetPoint(0)
                         downstream = downstream_reaches[hydrography_index]
                         f.write(f"r{reach},")
-                        f.write(f"{round(coord[0], 2)},")
-                        f.write(f"{round(coord[1], 2)},")
-                        f.write(f"{round(coord[2], 8)},")
+                        f.write(f"{round(coord[0], 2)},{round(coord[1], 2)},{round(coord[2], 8)},")
                         f.write(f"{'' if downstream == 'Outlet' else 'r'}{downstream},")
                         f.write(f"{initial_depths[hydrography_index]},")
                         f.write(f"{manning[hydrography_index]},")
@@ -598,6 +598,7 @@ class StepsRiverNetwork(base.Component):
             {"HOMEPATH": processing_path}
         )
 
+    # noinspection DuplicatedCode
     def prepare_substance_list(self, substance_list_file):
         """
         Prepares the substance list.
