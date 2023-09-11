@@ -13,6 +13,7 @@ class StepsRiverNetwork(base.Component):
     """The component encapsulating the Steps environmental fate module."""
     # RELEASES
     VERSION = base.VersionCollection(
+        base.VersionInfo("2.1.4", "2023-09-11"),
         base.VersionInfo("2.1.3", "2022-03-03"),
         base.VersionInfo("2.1.2", "2021-12-10"),
         base.VersionInfo("2.1.1", "2021-11-18"),
@@ -113,6 +114,7 @@ class StepsRiverNetwork(base.Component):
     VERSION.changed("2.1.1", "Reports element names of outputs")
     VERSION.changed("2.1.2", "Specifies offset of outputs")
     VERSION.changed("2.1.3", "Mitigated weak code warnings")
+    VERSION.added("2.1.4", "Information on runtime environment")
 
     def __init__(self, name, observer, store):
         """
@@ -125,7 +127,12 @@ class StepsRiverNetwork(base.Component):
         """
         super(StepsRiverNetwork, self).__init__(name, observer, store)
         self._module = base.Module(
-            "River network version of STEPS1234", "0.93", r"module\documentation\html\index.html")
+            "River network version of STEPS1234",
+            "0.93",
+            "module",
+            r"module\documentation\html\index.html",
+            base.Module("Python", "3.7.4", "module/bin/python", "module/bin/python/Doc/python374.chm", None)
+        )
         # noinspection SpellCheckingInspection
         self._inputs = base.InputContainer(self, [
             base.Input(
