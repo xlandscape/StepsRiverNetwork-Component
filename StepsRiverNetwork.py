@@ -125,7 +125,12 @@ class StepsRiverNetwork(base.Component):
         """
         super(StepsRiverNetwork, self).__init__(name, observer, store)
         self._module = base.Module(
-            "River network version of STEPS1234", "0.93", r"module\documentation\html\index.html")
+            "River network version of STEPS1234",
+            "0.93",
+            "module",
+            r"module\documentation\html\index.html",
+            base.Module("Python", "3.7.4", "module/bin/python", "module/bin/python/Doc/python374.chm", None)
+        )
         # noinspection SpellCheckingInspection
         self._inputs = base.InputContainer(self, [
             base.Input(
