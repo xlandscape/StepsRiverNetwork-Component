@@ -131,7 +131,15 @@ class StepsRiverNetwork(base.Component):
             "0.93",
             "module",
             r"module\documentation\html\index.html",
-            base.Module("Python", "3.7.4", "module/bin/python", "module/bin/python/Doc/python374.chm", None)
+            base.Module(
+                "Python",
+                "3.7.4",
+                "module/bin/python",
+                "module/bin/python/Doc/python374.chm",
+                None,
+                True,
+                "module/bin/python/NEWS.txt"
+            )
         )
         # noinspection SpellCheckingInspection
         self._inputs = base.InputContainer(self, [

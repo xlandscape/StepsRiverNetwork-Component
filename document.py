@@ -18,3 +18,9 @@ base.documentation.write_changelog(
 )
 base.documentation.write_contribution_notes(
     os.path.join(root_folder, "..", "variant", "StepsRiverNetwork", "CONTRIBUTING.md"))
+base.documentation.write_repository_info(
+    os.path.join(root_folder, "..", "variant", "StepsRiverNetwork"),
+    os.path.join(root_folder, "..", "variant", "StepsRiverNetwork", "repository.json"),
+    os.path.join(root_folder, "..", "..", "..", "versions.json"),
+    "component"
+)
