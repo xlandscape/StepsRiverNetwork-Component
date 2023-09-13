@@ -1,6 +1,18 @@
 # Changelog
 
-This is the changelog for the StepsRiverNetwork component. It was automatically created on 2023-09-12.
+This is the changelog for the StepsRiverNetwork component. It was automatically created on 2023-09-13.
+
+## [2.1.6] - 2023-09-13
+
+### Added
+
+- Scales attribute to global inputs
+
+### Changed
+
+### Fixed
+
+- Spatial scale of outputs
 
 ## [2.1.5] - 2023-09-12
 

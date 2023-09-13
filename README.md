@@ -18,16 +18,16 @@
 
 The component encapsulating the Steps environmental fate module.  
 This is an automatically generated documentation based on the available code and in-line documentation. The current
-version of this document is from 2023-09-12.
+version of this document is from 2023-09-13.
 
 ### Built with
 
-* Landscape Model core version 1.15.2
+* Landscape Model core version 1.15.3
 * River network version of STEPS1234 version 0.93 (see `module\documentation\html\index.html` for details)
 
 ## Getting Started
 
-The component can be used in any Landscape Model based on core version 1.15.2 or newer. See the Landscape
+The component can be used in any Landscape Model based on core version 1.15.3 or newer. See the Landscape
 Model core's `README` for general tips on how to add a component to a Landscape Model.
 
 ### Prerequisites
@@ -199,60 +199,70 @@ Values have to refer to the `time/day, space/reach` scale.
 The molar mass of the substance depositing at the water body surface.
 `MolarMass` expects its values to be of type `float`.
 The physical unit of the `MolarMass` input values is `g/mol`.
+Values have to refer to the `global` scale.
 
 #### DT50sw
 
 The half-life transformation time in water of the substance depositing at the water body  surface.
 `DT50sw` expects its values to be of type `float`.
 The physical unit of the `DT50sw` input values is `d`.
+Values have to refer to the `global` scale.
 
 #### DT50sed
 
 The half-life transformation time in sediment of the substance depositing at the water  body surface.
 `DT50sed` expects its values to be of type `float`.
 The physical unit of the `DT50sed` input values is `d`.
+Values have to refer to the `global` scale.
 
 #### KOC
 
 The coefficient for equilibrium adsorption in sediment of the substance depositing at  the water body surface.
 `KOC` expects its values to be of type `float`.
 The physical unit of the `KOC` input values is `l/kg`.
+Values have to refer to the `global` scale.
 
 #### Temp0
 
 The reference temperature to which the physical and chemical substance values apply.
 `Temp0` expects its values to be of type `float`.
 The physical unit of the `Temp0` input values is `°C`.
+Values have to refer to the `global` scale.
 
 #### Q10
 
 The temperature coefficient for chemical reactions of the deposited substance.
 `Q10` expects its values to be of type `float`.
 The physical unit of the `Q10` input values is `1`.
+Values have to refer to the `global` scale.
 
 #### PlantUptake
 
 The fraction of pesticide that is taken up by plants.
 `PlantUptake` expects its values to be of type `float`.
 The physical unit of the `PlantUptake` input values is `1`.
+Values have to refer to the `global` scale.
 
 #### QFac
 
 The QFac parameter is not documented in the module documentation.
 `QFac` expects its values to be of type `float`.
 The physical unit of the `QFac` input values is `1`.
+Values have to refer to the `global` scale.
 
 #### ThresholdSW
 
 The minimum surface water concentration that is reported.
 `ThresholdSW` expects its values to be of type `float`.
 The physical unit of the `ThresholdSW` input values is `mg/m³`.
+Values have to refer to the `global` scale.
 
 #### ThresholdSediment
 
 The minimum sediment concentration that is reported.
 `ThresholdSediment` expects its values to be of type `float`.
 The physical unit of the `ThresholdSediment` input values is `mg/kg`.
+Values have to refer to the `global` scale.
 
 #### HydrographyGeometries
 
@@ -349,7 +359,7 @@ Dimension 2 spans the number of simulated reaches.
 Chunking of the array is for fast retrieval of time series.
 Values expectedly have a unit of `mg/m³`.
 Individual array elements have a type of `float`.
-The values apply to the following scale: `time/hour, space/base_geometry`.
+The values apply to the following scale: `time/hour, space/reach`.
 #### MASS_SW
 The modelled substance mass in the water phase.  
 Values are expectedly of type `ndarray`.
@@ -359,7 +369,7 @@ Dimension 2 spans the number of simulated reaches.
 Chunking of the array is for fast retrieval of time series.
 Values expectedly have a unit of `mg`.
 Individual array elements have a type of `float`.
-The values apply to the following scale: `time/hour, space/base_geometry`.
+The values apply to the following scale: `time/hour, space/reach`.
 #### MASS_SED
 The modelled substance mass in sediment.  
 Values are expectedly of type `ndarray`.
@@ -369,7 +379,7 @@ Dimension 2 spans the number of simulated reaches.
 Chunking of the array is for fast retrieval of time series.
 Values expectedly have a unit of `mg`.
 Individual array elements have a type of `float`.
-The values apply to the following scale: `time/hour, space/base_geometry`.
+The values apply to the following scale: `time/hour, space/reach`.
 #### MASS_SED_DEEP
 The modelled substance mass in deep sediment.  
 Values are expectedly of type `ndarray`.
@@ -379,7 +389,7 @@ Dimension 2 spans the number of simulated reaches.
 Chunking of the array is for fast retrieval of time series.
 Values expectedly have a unit of `mg`.
 Individual array elements have a type of `float`.
-The values apply to the following scale: `time/hour, space/base_geometry`.
+The values apply to the following scale: `time/hour, space/reach`.
 #### PEC_SED
 The modelled concentration in sediment.  
 Values are expectedly of type `ndarray`.
@@ -389,7 +399,7 @@ Dimension 2 spans the number of simulated reaches.
 Chunking of the array is for fast retrieval of time series.
 Values expectedly have a unit of `mg/m³`.
 Individual array elements have a type of `float`.
-The values apply to the following scale: `time/hour, space/base_geometry`.
+The values apply to the following scale: `time/hour, space/reach`.
 #### Reaches
 The numerical identifiers of the reaches in the order of the other outputs.  
 Values are expectedly of type `list[int]`.
