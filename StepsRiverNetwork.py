@@ -218,64 +218,64 @@ class StepsRiverNetwork(base.Component):
             ),
             base.Input(
                 "MolarMass",
-                (attrib.Class(float, 1), attrib.Unit("g/mol", 1)),
+                (attrib.Class(float, 1), attrib.Unit("g/mol", 1), attrib.Scales("global")),
                 self.default_observer,
                 description="The molar mass of the substance depositing at the water body surface."
             ),
             base.Input(
                 "DT50sw",
-                (attrib.Class(float, 1), attrib.Unit("d", 1)),
+                (attrib.Class(float, 1), attrib.Unit("d", 1), attrib.Scales("global")),
                 self.default_observer,
                 description="""The half-life transformation time in water of the substance depositing at the water body 
                 surface."""
             ),
             base.Input(
                 "DT50sed",
-                (attrib.Class(float, 1), attrib.Unit("d", 1)),
+                (attrib.Class(float, 1), attrib.Unit("d", 1), attrib.Scales("global")),
                 self.default_observer,
                 description="""The half-life transformation time in sediment of the substance depositing at the water 
                 body surface."""
             ),
             base.Input(
                 "KOC",
-                (attrib.Class(float, 1), attrib.Unit("l/kg", 1)),
+                (attrib.Class(float, 1), attrib.Unit("l/kg", 1), attrib.Scales("global")),
                 self.default_observer,
                 description="""The coefficient for equilibrium adsorption in sediment of the substance depositing at 
                 the water body surface."""
             ),
             base.Input(
                 "Temp0",
-                (attrib.Class(float, 1), attrib.Unit("°C", 1)),
+                (attrib.Class(float, 1), attrib.Unit("°C", 1), attrib.Scales("global")),
                 self.default_observer,
                 description="The reference temperature to which the physical and chemical substance values apply."
             ),
             base.Input(
                 "Q10",
-                (attrib.Class(float, 1), attrib.Unit("1", 1)),
+                (attrib.Class(float, 1), attrib.Unit("1", 1), attrib.Scales("global")),
                 self.default_observer,
                 description="The temperature coefficient for chemical reactions of the deposited substance."
             ),
             base.Input(
                 "PlantUptake",
-                (attrib.Class(float, 1), attrib.Unit("1", 1)),
+                (attrib.Class(float, 1), attrib.Unit("1", 1), attrib.Scales("global")),
                 self.default_observer,
                 description="The fraction of pesticide that is taken up by plants."
             ),
             base.Input(
                 "QFac",
-                (attrib.Class(float, 1), attrib.Unit("1", 1)),
+                (attrib.Class(float, 1), attrib.Unit("1", 1), attrib.Scales("global")),
                 self.default_observer,
                 description="The QFac parameter is not documented in the module documentation."
             ),
             base.Input(
                 "ThresholdSW",
-                (attrib.Class(float, 1), attrib.Unit("mg/m³", 1)),
+                (attrib.Class(float, 1), attrib.Unit("mg/m³", 1), attrib.Scales("global")),
                 self.default_observer,
                 description="The minimum surface water concentration that is reported."
             ),
             base.Input(
                 "ThresholdSediment",
-                (attrib.Class(float, 1), attrib.Unit("mg/kg", 1)),
+                (attrib.Class(float, 1), attrib.Unit("mg/kg", 1), attrib.Scales("global")),
                 self.default_observer,
                 description="The minimum sediment concentration that is reported."
             ),
@@ -362,7 +362,7 @@ class StepsRiverNetwork(base.Component):
                 "PEC_SW",
                 store,
                 self,
-                {"data_type": np.float, "scales": "time/hour, space/base_geometry"},
+                {"data_type": np.float, "scales": "time/hour, space/reach"},
                 "The modelled concentration in the water phase.",
                 {
                     "type": np.ndarray,
@@ -375,7 +375,7 @@ class StepsRiverNetwork(base.Component):
                 "MASS_SW",
                 store,
                 self,
-                {"data_type": np.float, "scales": "time/hour, space/base_geometry"},
+                {"data_type": np.float, "scales": "time/hour, space/reach"},
                 "The modelled substance mass in the water phase.",
                 {
                     "type": np.ndarray,
@@ -388,7 +388,7 @@ class StepsRiverNetwork(base.Component):
                 "MASS_SED",
                 store,
                 self,
-                {"data_type": np.float, "scales": "time/hour, space/base_geometry"},
+                {"data_type": np.float, "scales": "time/hour, space/reach"},
                 "The modelled substance mass in sediment.",
                 {
                     "type": np.ndarray,
@@ -401,7 +401,7 @@ class StepsRiverNetwork(base.Component):
                 "MASS_SED_DEEP",
                 store,
                 self,
-                {"data_type": np.float, "scales": "time/hour, space/base_geometry"},
+                {"data_type": np.float, "scales": "time/hour, space/reach"},
                 "The modelled substance mass in deep sediment.",
                 {
                     "type": np.ndarray,
@@ -414,7 +414,7 @@ class StepsRiverNetwork(base.Component):
                 "PEC_SED",
                 store,
                 self,
-                {"data_type": np.float, "scales": "time/hour, space/base_geometry"},
+                {"data_type": np.float, "scales": "time/hour, space/reach"},
                 "The modelled concentration in sediment.",
                 {
                     "type": np.ndarray,
