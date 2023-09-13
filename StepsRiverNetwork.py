@@ -13,6 +13,7 @@ class StepsRiverNetwork(base.Component):
     """The component encapsulating the Steps environmental fate module."""
     # RELEASES
     VERSION = base.VersionCollection(
+        base.VersionInfo("2.1.6", "2023-09-13"),
         base.VersionInfo("2.1.5", "2023-09-12"),
         base.VersionInfo("2.1.4", "2023-09-11"),
         base.VersionInfo("2.1.3", "2022-03-03"),
@@ -120,6 +121,8 @@ class StepsRiverNetwork(base.Component):
     VERSION.added("2.1.5", "Creation of repository info during documentation")
     VERSION.added("2.1.5", "Repository info, changelog, contributing note and readme to module")
     VERSION.added("2.1.5", "Repository info to Python runtime environment")
+    VERSION.added("2.1.6", "Scales attribute to global inputs")
+    VERSION.fixed("2.1.6", "Spatial scale of outputs")
 
     def __init__(self, name, observer, store):
         """
