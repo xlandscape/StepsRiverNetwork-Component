@@ -16,18 +16,21 @@
 
 ## About the project
 
-The component encapsulating the Steps environmental fate module.  
+The component encapsulating the StepsRiverNetwork environmental fate module. StepsRiverNetwork simulates in-stream
+environmental fate processes of pesticides for an entire river network of a catchment. Environmental fate processes
+are calculated for each single reach, and transport across the entire catchment is reported in an explicit timestep
+of one hour.  
 This is an automatically generated documentation based on the available code and in-line documentation. The current
-version of this document is from 2023-09-13.
+version of this document is from 2023-09-18.
 
 ### Built with
 
-* Landscape Model core version 1.15.3
+* Landscape Model core version 1.15.5
 * River network version of STEPS1234 version 0.93 (see `module\documentation\html\index.html` for details)
 
 ## Getting Started
 
-The component can be used in any Landscape Model based on core version 1.15.3 or newer. See the Landscape
+The component can be used in any Landscape Model based on core version 1.15.5 or newer. See the Landscape
 Model core's `README` for general tips on how to add a component to a Landscape Model.
 
 ### Prerequisites
@@ -144,16 +147,15 @@ Values have to refer to the `global` scale.
 
 #### Catchment
 
-A file path to a CSV file detailing the hydrographic properties of the entire catchment depicted by hydrographic the
+A file path to a CSV file detailing the hydrographic properties of the entire catchment depicted by a hydrographic
 scenario. This file is usually provided by the scenario developer (if usage of StepsRiverNetwork is supported by the
-scenario) and is made available as a project macro.
+scenario) and is made available as a project macro. See the module documentation for details on the format.
 `Catchment` expects its values to be of type `str`.
 Values of the `Catchment` input may not have a physical unit.
 Values have to refer to the `global` scale.
 
 #### WaterDischarge
 
-The entire water discharge of this reach into the next downstream reach.
 `WaterDischarge` expects its values to be of type `ndarray`.
 The physical unit of the `WaterDischarge` input values is `m³/d`.
 Values have to refer to the `time/hour, space/reach` scale.
@@ -161,193 +163,171 @@ Values have to refer to the `time/hour, space/reach` scale.
 #### TimeSeriesStart
 
 The first time step for which input data is provided. This is also the time step of where the StepsRiverNetwork
-simulation starts.
+simulation starts. This input will be removed in a future version of the `StepsRiverNetwork` component.
 `TimeSeriesStart` expects its values to be of type `datetime`.
 Values of the `TimeSeriesStart` input may not have a physical unit.
 Values have to refer to the `global` scale.
 
 #### ReachesHydrology
 
-The numeric identifiers for individual reaches (in the order of the hydrological inputs).
+The numeric identifiers for individual reaches (in the order of the hydrological inputs). his input will be removed in a
+future version of the `StepsRiverNetwork` component.
 `ReachesHydrology` expects its values to be of type `ndarray`.
 Values of the `ReachesHydrology` input may not have a physical unit.
 Values have to refer to the `space/reach` scale.
 
 #### WaterVolume
 
-The amount of water contained by a reach.
 `WaterVolume` expects its values to be of type `ndarray`.
 The physical unit of the `WaterVolume` input values is `m³`.
 Values have to refer to the `time/hour, space/reach` scale.
 
 #### WetSurfaceArea
 
-The surface area of a reach.
 `WetSurfaceArea` expects its values to be of type `ndarray`.
 The physical unit of the `WetSurfaceArea` input values is `m²`.
 Values have to refer to the `time/hour, space/reach` scale.
 
 #### DriftDeposition
 
-The average drift deposition onto the surface of a water body.
 `DriftDeposition` expects its values to be of type `ndarray`.
 The physical unit of the `DriftDeposition` input values is `mg/m²`.
 Values have to refer to the `time/day, space/reach` scale.
 
 #### MolarMass
 
-The molar mass of the substance depositing at the water body surface.
 `MolarMass` expects its values to be of type `float`.
 The physical unit of the `MolarMass` input values is `g/mol`.
 Values have to refer to the `global` scale.
 
 #### DT50sw
 
-The half-life transformation time in water of the substance depositing at the water body  surface.
 `DT50sw` expects its values to be of type `float`.
 The physical unit of the `DT50sw` input values is `d`.
 Values have to refer to the `global` scale.
 
 #### DT50sed
 
-The half-life transformation time in sediment of the substance depositing at the water  body surface.
 `DT50sed` expects its values to be of type `float`.
 The physical unit of the `DT50sed` input values is `d`.
 Values have to refer to the `global` scale.
 
 #### KOC
 
-The coefficient for equilibrium adsorption in sediment of the substance depositing at  the water body surface.
 `KOC` expects its values to be of type `float`.
 The physical unit of the `KOC` input values is `l/kg`.
 Values have to refer to the `global` scale.
 
 #### Temp0
 
-The reference temperature to which the physical and chemical substance values apply.
 `Temp0` expects its values to be of type `float`.
 The physical unit of the `Temp0` input values is `°C`.
 Values have to refer to the `global` scale.
 
 #### Q10
 
-The temperature coefficient for chemical reactions of the deposited substance.
 `Q10` expects its values to be of type `float`.
 The physical unit of the `Q10` input values is `1`.
 Values have to refer to the `global` scale.
 
 #### PlantUptake
 
-The fraction of pesticide that is taken up by plants.
 `PlantUptake` expects its values to be of type `float`.
 The physical unit of the `PlantUptake` input values is `1`.
 Values have to refer to the `global` scale.
 
 #### QFac
 
-The QFac parameter is not documented in the module documentation.
 `QFac` expects its values to be of type `float`.
 The physical unit of the `QFac` input values is `1`.
 Values have to refer to the `global` scale.
 
 #### ThresholdSW
 
-The minimum surface water concentration that is reported.
 `ThresholdSW` expects its values to be of type `float`.
 The physical unit of the `ThresholdSW` input values is `mg/m³`.
 Values have to refer to the `global` scale.
 
 #### ThresholdSediment
 
-The minimum sediment concentration that is reported.
 `ThresholdSediment` expects its values to be of type `float`.
 The physical unit of the `ThresholdSediment` input values is `mg/kg`.
 Values have to refer to the `global` scale.
 
 #### HydrographyGeometries
 
-The geometries of individual water body segments (reaches) in WKB representation.
+The geometries of individual water body segments (reaches) in WKB representation. This input will be removed in a future
+version of the `StepsRiverNetwork` component.
 `HydrographyGeometries` expects its values to be of type `list`.
 Values of the `HydrographyGeometries` input may not have a physical unit.
-Values have to refer to the `space/base_geometry` scale.
+Values have to refer to the `space/reach` scale.
 
 #### DownstreamReach
 
-The identifier of the reach that is located downstream of the current reach.
 `DownstreamReach` expects its values to be of type `list`.
 Values of the `DownstreamReach` input may not have a physical unit.
-Values have to refer to the `space/base_geometry` scale.
+Values have to refer to the `space/reach` scale.
 
 #### InitialDepth
 
-The initial water depth of the current reach.
 `InitialDepth` expects its values to be of type `list`.
 The physical unit of the `InitialDepth` input values is `m`.
-Values have to refer to the `space/base_geometry` scale.
+Values have to refer to the `space/reach` scale.
 
 #### Manning
 
-The Manning friction number applying to the current reach.
 `Manning` expects its values to be of type `list`.
 The physical unit of the `Manning` input values is `1`.
-Values have to refer to the `space/base_geometry` scale.
+Values have to refer to the `space/reach` scale.
 
 #### BankSlope
 
-The slope of the reach.
 `BankSlope` expects its values to be of type `list`.
 The physical unit of the `BankSlope` input values is `1`.
-Values have to refer to the `space/base_geometry` scale.
+Values have to refer to the `space/reach` scale.
 
 #### Width
 
-The width of the reach (undocumented by the module).
 `Width` expects its values to be of type `list`.
 The physical unit of the `Width` input values is `m`.
-Values have to refer to the `space/base_geometry` scale.
+Values have to refer to the `space/reach` scale.
 
 #### Shape
 
-The shape of the current reach.
 `Shape` expects its values to be of type `list`.
 Values of the `Shape` input may not have a physical unit.
-Values have to refer to the `space/base_geometry` scale.
+Values have to refer to the `space/reach` scale.
 Allowed values are: `TriangularReach`, `RectangularReach`, `SWATReachType`.
 
 #### BulkDensity
 
-The mass density of the reach sediment.
 `BulkDensity` expects its values to be of type `list`.
 The physical unit of the `BulkDensity` input values is `kg/m³`.
-Values have to refer to the `space/base_geometry` scale.
+Values have to refer to the `space/reach` scale.
 
 #### Porosity
 
-The porosity of the reach sediment.
 `Porosity` expects its values to be of type `list`.
 The physical unit of the `Porosity` input values is `m³/m³`.
-Values have to refer to the `space/base_geometry` scale.
+Values have to refer to the `space/reach` scale.
 
 #### OrganicContent
 
-The amount of organic material in the sediment of the reach.
 `OrganicContent` expects its values to be of type `list`.
 The physical unit of the `OrganicContent` input values is `g/g`.
-Values have to refer to the `space/base_geometry` scale.
+Values have to refer to the `space/reach` scale.
 
 #### SedimentDepth1stLayer
 
-The depth of the first layer of sediment.
 `SedimentDepth1stLayer` expects its values to be of type `list`.
 The physical unit of the `SedimentDepth1stLayer` input values is `m`.
-Values have to refer to the `space/base_geometry` scale.
+Values have to refer to the `space/reach` scale.
 
 #### SedimentDepth2ndLayer
 
-The depth of the second layer of sediment.
 `SedimentDepth2ndLayer` expects its values to be of type `list`.
 The physical unit of the `SedimentDepth2ndLayer` input values is `m`.
-Values have to refer to the `space/base_geometry` scale.
+Values have to refer to the `space/reach` scale.
 
 ### Outputs
 #### PEC_SW
