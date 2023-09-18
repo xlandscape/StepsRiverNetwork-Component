@@ -10,7 +10,12 @@ import attrib
 
 
 class StepsRiverNetwork(base.Component):
-    """The component encapsulating the Steps environmental fate module."""
+    """
+    The component encapsulating the StepsRiverNetwork environmental fate module. StepsRiverNetwork simulates in-stream
+    environmental fate processes of pesticides for an entire river network of a catchment. Environmental fate processes
+    are calculated for each single reach, and transport across the entire catchment is reported in an explicit timestep
+    of one hour.
+    """
     # RELEASES
     VERSION = base.VersionCollection(
         base.VersionInfo("2.1.6", "2023-09-13"),
@@ -153,211 +158,150 @@ class StepsRiverNetwork(base.Component):
         self._inputs = base.InputContainer(self, [
             base.Input(
                 "ProcessingPath",
-                (attrib.Class(str, 1), attrib.Unit(None, 1), attrib.Scales("global", 1)),
+                (attrib.Class(str), attrib.Unit(None), attrib.Scales("global")),
                 self.default_observer,
-                description="""The working directory for the module. It is used for all files prepared as module inputs
-                or generated as (temporary) module outputs."""
+                description="The working directory for the module. It is used for all files prepared as module inputs "
+                            "or generated as (temporary) module outputs."
             ),
             base.Input(
                 "Catchment",
-                (attrib.Class(str, 1), attrib.Unit(None, 1), attrib.Scales("global", 1)),
+                (attrib.Class(str), attrib.Unit(None), attrib.Scales("global")),
                 self.default_observer,
-                description="""A file path to a CSV file detailing the hydrographic properties of the entire catchment
-                depicted by hydrographic the scenario. This file is usually provided by the scenario developer (if
-                usage of StepsRiverNetwork is supported by the scenario) and is made available as a project macro."""
+                description="A file path to a CSV file detailing the hydrographic properties of the entire catchment "
+                            "depicted by a hydrographic scenario. This file is usually provided by the scenario "
+                            "developer (if usage of StepsRiverNetwork is supported by the scenario) and is made "
+                            "available as a project macro. See the module documentation for details on the format."
             ),
             base.Input(
                 "WaterDischarge",
-                (
-                    attrib.Class(np.ndarray, 1),
-                    attrib.Unit("m³/d", 1),
-                    attrib.Scales("time/hour, space/reach", 1)
-                ),
-                self.default_observer,
-                description="The entire water discharge of this reach into the next downstream reach."
+                (attrib.Class(np.ndarray), attrib.Unit("m³/d"), attrib.Scales("time/hour, space/reach")),
+                self.default_observer
             ),
             base.Input(
                 "TimeSeriesStart",
-                (attrib.Class(datetime.datetime, 1), attrib.Unit(None, 1), attrib.Scales("global", 1)),
+                (attrib.Class(datetime.datetime), attrib.Unit(None), attrib.Scales("global")),
                 self.default_observer,
-                description="""The first time step for which input data is provided. This is also the time step of where
-                the StepsRiverNetwork simulation starts."""
+                description="The first time step for which input data is provided. This is also the time step of where "
+                            "the StepsRiverNetwork simulation starts. This input will be removed in a future version "
+                            "of the `StepsRiverNetwork` component."
             ),
             base.Input(
                 "ReachesHydrology",
                 (attrib.Class(np.ndarray, 1), attrib.Unit(None, 1), attrib.Scales("space/reach", 1)),
                 self.default_observer,
-                description="The numeric identifiers for individual reaches (in the order of the hydrological inputs)."
+                description="The numeric identifiers for individual reaches (in the order of the hydrological inputs). "
+                            "his input will be removed in a future version of the `StepsRiverNetwork` component."
             ),
             base.Input(
                 "WaterVolume",
-                (
-                    attrib.Class(np.ndarray, 1),
-                    attrib.Unit("m³", 1),
-                    attrib.Scales("time/hour, space/reach", 1)
-                ),
-                self.default_observer,
-                description="The amount of water contained by a reach."
+                (attrib.Class(np.ndarray), attrib.Unit("m³"), attrib.Scales("time/hour, space/reach")),
+                self.default_observer
             ),
             base.Input(
                 "WetSurfaceArea",
-                (
-                    attrib.Class(np.ndarray, 1),
-                    attrib.Unit("m²", 1),
-                    attrib.Scales("time/hour, space/reach", 1)
-                ),
-                self.default_observer,
-                description="The surface area of a reach."
+                (attrib.Class(np.ndarray), attrib.Unit("m²"), attrib.Scales("time/hour, space/reach")),
+                self.default_observer
             ),
             base.Input(
                 "DriftDeposition",
-                (
-                    attrib.Class(np.ndarray, 1),
-                    attrib.Unit("mg/m²", 1),
-                    attrib.Scales("time/day, space/reach", 1)
-                ),
-                self.default_observer,
-                description="The average drift deposition onto the surface of a water body."
+                (attrib.Class(np.ndarray), attrib.Unit("mg/m²"), attrib.Scales("time/day, space/reach")),
+                self.default_observer
             ),
             base.Input(
                 "MolarMass",
-                (attrib.Class(float, 1), attrib.Unit("g/mol", 1), attrib.Scales("global")),
-                self.default_observer,
-                description="The molar mass of the substance depositing at the water body surface."
+                (attrib.Class(float), attrib.Unit("g/mol"), attrib.Scales("global")),
+                self.default_observer
             ),
             base.Input(
-                "DT50sw",
-                (attrib.Class(float, 1), attrib.Unit("d", 1), attrib.Scales("global")),
-                self.default_observer,
-                description="""The half-life transformation time in water of the substance depositing at the water body 
-                surface."""
-            ),
+                "DT50sw", (attrib.Class(float), attrib.Unit("d"), attrib.Scales("global")), self.default_observer),
             base.Input(
-                "DT50sed",
-                (attrib.Class(float, 1), attrib.Unit("d", 1), attrib.Scales("global")),
-                self.default_observer,
-                description="""The half-life transformation time in sediment of the substance depositing at the water 
-                body surface."""
-            ),
+                "DT50sed", (attrib.Class(float), attrib.Unit("d"), attrib.Scales("global")), self.default_observer),
             base.Input(
-                "KOC",
-                (attrib.Class(float, 1), attrib.Unit("l/kg", 1), attrib.Scales("global")),
-                self.default_observer,
-                description="""The coefficient for equilibrium adsorption in sediment of the substance depositing at 
-                the water body surface."""
-            ),
+                "KOC", (attrib.Class(float), attrib.Unit("l/kg"), attrib.Scales("global")), self.default_observer),
             base.Input(
-                "Temp0",
-                (attrib.Class(float, 1), attrib.Unit("°C", 1), attrib.Scales("global")),
-                self.default_observer,
-                description="The reference temperature to which the physical and chemical substance values apply."
-            ),
+                "Temp0", (attrib.Class(float), attrib.Unit("°C"), attrib.Scales("global")), self.default_observer),
             base.Input(
-                "Q10",
-                (attrib.Class(float, 1), attrib.Unit("1", 1), attrib.Scales("global")),
-                self.default_observer,
-                description="The temperature coefficient for chemical reactions of the deposited substance."
-            ),
+                "Q10", (attrib.Class(float, 1), attrib.Unit("1", 1), attrib.Scales("global")), self.default_observer),
             base.Input(
-                "PlantUptake",
-                (attrib.Class(float, 1), attrib.Unit("1", 1), attrib.Scales("global")),
-                self.default_observer,
-                description="The fraction of pesticide that is taken up by plants."
-            ),
+                "PlantUptake", (attrib.Class(float), attrib.Unit("1"), attrib.Scales("global")), self.default_observer),
             base.Input(
-                "QFac",
-                (attrib.Class(float, 1), attrib.Unit("1", 1), attrib.Scales("global")),
-                self.default_observer,
-                description="The QFac parameter is not documented in the module documentation."
-            ),
+                "QFac", (attrib.Class(float), attrib.Unit("1"), attrib.Scales("global")), self.default_observer),
             base.Input(
                 "ThresholdSW",
-                (attrib.Class(float, 1), attrib.Unit("mg/m³", 1), attrib.Scales("global")),
-                self.default_observer,
-                description="The minimum surface water concentration that is reported."
+                (attrib.Class(float), attrib.Unit("mg/m³"), attrib.Scales("global")),
+                self.default_observer
             ),
             base.Input(
                 "ThresholdSediment",
-                (attrib.Class(float, 1), attrib.Unit("mg/kg", 1), attrib.Scales("global")),
-                self.default_observer,
-                description="The minimum sediment concentration that is reported."
+                (attrib.Class(float), attrib.Unit("mg/kg"), attrib.Scales("global")),
+                self.default_observer
             ),
             base.Input(
                 "HydrographyGeometries",
-                (attrib.Class(list[bytes]), attrib.Unit(None), attrib.Scales("space/base_geometry")),
+                (attrib.Class(list[bytes]), attrib.Unit(None), attrib.Scales("space/reach")),
                 self.default_observer,
-                description="The geometries of individual water body segments (reaches) in WKB representation."
+                description="The geometries of individual water body segments (reaches) in WKB representation. This "
+                            "input will be removed in a future version of the `StepsRiverNetwork` component."
             ),
             base.Input(
                 "DownstreamReach",
-                (attrib.Class(list[str]), attrib.Unit(None), attrib.Scales("space/base_geometry")),
-                self.default_observer,
-                description="The identifier of the reach that is located downstream of the current reach."
+                (attrib.Class(list[str]), attrib.Unit(None), attrib.Scales("space/reach")),
+                self.default_observer
             ),
             base.Input(
                 "InitialDepth",
-                (attrib.Class(list[float]), attrib.Unit("m"), attrib.Scales("space/base_geometry")),
-                self.default_observer,
-                description="The initial water depth of the current reach."
+                (attrib.Class(list[float]), attrib.Unit("m"), attrib.Scales("space/reach")),
+                self.default_observer
             ),
             base.Input(
                 "Manning",
-                (attrib.Class(list[float]), attrib.Unit("1"), attrib.Scales("space/base_geometry")),
-                self.default_observer,
-                description="The Manning friction number applying to the current reach."
+                (attrib.Class(list[float]), attrib.Unit("1"), attrib.Scales("space/reach")),
+                self.default_observer
             ),
             base.Input(
                 "BankSlope",
-                (attrib.Class(list[float]), attrib.Unit("1"), attrib.Scales("space/base_geometry")),
-                self.default_observer,
-                description="The slope of the reach."
+                (attrib.Class(list[float]), attrib.Unit("1"), attrib.Scales("space/reach")),
+                self.default_observer
             ),
             base.Input(
                 "Width",
-                (attrib.Class(list[float]), attrib.Unit("m"), attrib.Scales("space/base_geometry")),
-                self.default_observer,
-                description="The width of the reach (undocumented by the module)."
+                (attrib.Class(list[float]), attrib.Unit("m"), attrib.Scales("space/reach")),
+                self.default_observer
             ),
             base.Input(
                 "Shape",
                 (
                     attrib.Class(list[str]),
                     attrib.Unit(None),
-                    attrib.Scales("space/base_geometry"),
+                    attrib.Scales("space/reach"),
                     attrib.InList(("TriangularReach", "RectangularReach", "SWATReachType"))
                 ),
-                self.default_observer,
-                description="The shape of the current reach."
+                self.default_observer
             ),
             base.Input(
                 "BulkDensity",
-                (attrib.Class(list[float]), attrib.Unit("kg/m³"), attrib.Scales("space/base_geometry")),
-                self.default_observer,
-                description="The mass density of the reach sediment."
+                (attrib.Class(list[float]), attrib.Unit("kg/m³"), attrib.Scales("space/reach")),
+                self.default_observer
             ),
             base.Input(
                 "Porosity",
-                (attrib.Class(list[float]), attrib.Unit("m³/m³"), attrib.Scales("space/base_geometry")),
-                self.default_observer,
-                description="The porosity of the reach sediment."
+                (attrib.Class(list[float]), attrib.Unit("m³/m³"), attrib.Scales("space/reach")),
+                self.default_observer
             ),
             base.Input(
                 "OrganicContent",
-                (attrib.Class(list[float]), attrib.Unit("g/g"), attrib.Scales("space/base_geometry")),
-                self.default_observer,
-                description="The amount of organic material in the sediment of the reach."
+                (attrib.Class(list[float]), attrib.Unit("g/g"), attrib.Scales("space/reach")),
+                self.default_observer
             ),
             base.Input(
                 "SedimentDepth1stLayer",
-                (attrib.Class(list[float]), attrib.Unit("m"), attrib.Scales("space/base_geometry")),
-                self.default_observer,
-                description="The depth of the first layer of sediment."
+                (attrib.Class(list[float]), attrib.Unit("m"), attrib.Scales("space/reach")),
+                self.default_observer
             ),
             base.Input(
                 "SedimentDepth2ndLayer",
-                (attrib.Class(list[float]), attrib.Unit("m"), attrib.Scales("space/base_geometry")),
-                self.default_observer,
-                description="The depth of the second layer of sediment."
+                (attrib.Class(list[float]), attrib.Unit("m"), attrib.Scales("space/reach")),
+                self.default_observer
             )
         ])
         self._outputs = base.OutputContainer(self, [
@@ -437,6 +381,28 @@ class StepsRiverNetwork(base.Component):
         ])
         self._begin = None
         self._timeString = None
+        if self.default_observer:
+            self.default_observer.write_message(
+                2,
+                "StepsRiverNetwork currently does not check the identity of reaches",
+                "Make sure that inputs of scale space/reach retrieve data in the same reach-order"
+            )
+            self.default_observer.write_message(
+                3,
+                "The TimeSeriesStart input will be removed in a future version of the StepsRiverNetwork component",
+                "The time offset will be retrieved from the metadata of the WaterDischarge input"
+            )
+            self.default_observer.write_message(
+                3,
+                "The ReachesHydrology input will be removed in a future version of the StepsRiverNetwork component",
+                "The reach names will be retrieved from the metadata of the WaterDischarge input"
+            )
+            self.default_observer.write_message(
+                3,
+                "The HydrographyGeometries input will be removed in a future version of the StepsRiverNetwork "
+                "component",
+                "The reach geometries will be retrieved from the metadata of the WaterDischarge input"
+            )
 
     def run(self):
         """
