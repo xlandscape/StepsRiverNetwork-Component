@@ -21,16 +21,16 @@ environmental fate processes of pesticides for an entire river network of a catc
 are calculated for each single reach, and transport across the entire catchment is reported in an explicit timestep
 of one hour.  
 This is an automatically generated documentation based on the available code and in-line documentation. The current
-version of this document is from 2023-09-18.
+version of this document is from 2023-09-20.
 
 ### Built with
 
-* Landscape Model core version 1.15.5
+* Landscape Model core version 1.15.8
 * River network version of STEPS1234 version 0.93 (see `module\documentation\html\index.html` for details)
 
 ## Getting Started
 
-The component can be used in any Landscape Model based on core version 1.15.5 or newer. See the Landscape
+The component can be used in any Landscape Model based on core version 1.15.8 or newer. See the Landscape
 Model core's `README` for general tips on how to add a component to a Landscape Model.
 
 ### Prerequisites
@@ -329,62 +329,75 @@ Values have to refer to the `space/reach` scale.
 The physical unit of the `SedimentDepth2ndLayer` input values is `m`.
 Values have to refer to the `space/reach` scale.
 
+
 ### Outputs
 #### PEC_SW
-The modelled concentration in the water phase.  
-Values are expectedly of type `ndarray`.
-Value representation is in a 2-dimensional array.
-Dimension 1 spans the number of simulated hours.
-Dimension 2 spans the number of simulated reaches.
-Chunking of the array is for fast retrieval of time series.
-Values expectedly have a unit of `mg/m³`.
-Individual array elements have a type of `float`.
-The values apply to the following scale: `time/hour, space/reach`.
+The modelled concentration in the water phase.
+- Data Type: `float`
+- Scales: `time/hour, space/reach`
+- Type: `numpy.ndarray`
+- Shape: `time/hour`: the number of simulated hours, `space/reach`: the number of simulated reaches
+- Chunks: for fast retrieval of time series
+- Unit: mg/m³
+- Element_Names: `time/hour`: None, `space/reach`: as specified by the `Reaches` output
+- Offset: `time/hour`: the value of the `TimeSeriesStart` input, `space/reach`: None
+- Geometries: `time/hour`: None, `space/reach`: as specified by the `ReachesGeometries` output
 #### MASS_SW
-The modelled substance mass in the water phase.  
-Values are expectedly of type `ndarray`.
-Value representation is in a 2-dimensional array.
-Dimension 1 spans the number of simulated hours.
-Dimension 2 spans the number of simulated reaches.
-Chunking of the array is for fast retrieval of time series.
-Values expectedly have a unit of `mg`.
-Individual array elements have a type of `float`.
-The values apply to the following scale: `time/hour, space/reach`.
+The modelled substance mass in the water phase.
+- Data Type: `float`
+- Scales: `time/hour, space/reach`
+- Type: `numpy.ndarray`
+- Shape: `time/hour`: the number of simulated hours, `space/reach`: the number of simulated reaches
+- Chunks: for fast retrieval of time series
+- Unit: mg
+- Element_Names: `time/hour`: None, `space/reach`: as specified by the `Reaches` output
+- Offset: `time/hour`: the value of the `TimeSeriesStart` input, `space/reach`: None
+- Geometries: `time/hour`: None, `space/reach`: as specified by the `ReachesGeometries` output
 #### MASS_SED
-The modelled substance mass in sediment.  
-Values are expectedly of type `ndarray`.
-Value representation is in a 2-dimensional array.
-Dimension 1 spans the number of simulated hours.
-Dimension 2 spans the number of simulated reaches.
-Chunking of the array is for fast retrieval of time series.
-Values expectedly have a unit of `mg`.
-Individual array elements have a type of `float`.
-The values apply to the following scale: `time/hour, space/reach`.
+The modelled substance mass in sediment.
+- Data Type: `float`
+- Scales: `time/hour, space/reach`
+- Type: `numpy.ndarray`
+- Shape: `time/hour`: the number of simulated hours, `space/reach`: the number of simulated reaches
+- Chunks: for fast retrieval of time series
+- Unit: mg
+- Element_Names: `time/hour`: None, `space/reach`: as specified by the `Reaches` output
+- Offset: `time/hour`: the value of the `TimeSeriesStart` input, `space/reach`: None
+- Geometries: `time/hour`: None, `space/reach`: as specified by the `ReachesGeometries` output
 #### MASS_SED_DEEP
-The modelled substance mass in deep sediment.  
-Values are expectedly of type `ndarray`.
-Value representation is in a 2-dimensional array.
-Dimension 1 spans the number of simulated hours.
-Dimension 2 spans the number of simulated reaches.
-Chunking of the array is for fast retrieval of time series.
-Values expectedly have a unit of `mg`.
-Individual array elements have a type of `float`.
-The values apply to the following scale: `time/hour, space/reach`.
+The modelled substance mass in deep sediment.
+- Data Type: `float`
+- Scales: `time/hour, space/reach`
+- Type: `numpy.ndarray`
+- Shape: `time/hour`: the number of simulated hours, `space/reach`: the number of simulated reaches
+- Chunks: for fast retrieval of time series
+- Unit: mg
+- Element_Names: `time/hour`: None, `space/reach`: as specified by the `Reaches` output
+- Offset: `time/hour`: the value of the `TimeSeriesStart` input, `space/reach`: None
+- Geometries: `time/hour`: None, `space/reach`: as specified by the `ReachesGeometries` output
 #### PEC_SED
-The modelled concentration in sediment.  
-Values are expectedly of type `ndarray`.
-Value representation is in a 2-dimensional array.
-Dimension 1 spans the number of simulated hours.
-Dimension 2 spans the number of simulated reaches.
-Chunking of the array is for fast retrieval of time series.
-Values expectedly have a unit of `mg/m³`.
-Individual array elements have a type of `float`.
-The values apply to the following scale: `time/hour, space/reach`.
+The modelled concentration in sediment.
+- Data Type: `float`
+- Scales: `time/hour, space/reach`
+- Type: `numpy.ndarray`
+- Shape: `time/hour`: the number of simulated hours, `space/reach`: the number of simulated reaches
+- Chunks: for fast retrieval of time series
+- Unit: mg/m³
+- Element_Names: `time/hour`: None, `space/reach`: as specified by the `Reaches` output
+- Offset: `time/hour`: the value of the `TimeSeriesStart` input, `space/reach`: None
+- Geometries: `time/hour`: None, `space/reach`: as specified by the `ReachesGeometries` output
 #### Reaches
-The numerical identifiers of the reaches in the order of the other outputs.  
-Values are expectedly of type `list[int]`.
-The values apply to the following scale: `space/reach`.
-
+The numerical identifiers of the reaches in the order of the other outputs.
+- Scales: `space/reach`
+- Type: `list`
+- Element_Names: `space/reach`: as specified by the output itself
+- Geometries: `space/reach`: as specified by the `ReachesGeometries` output
+#### ReachesGeometries
+The geometry of the reaches in Well-Known-Byte notation in the order of the reaches as specified by the `Reaches` output.
+- Scales: `space/reach`
+- Type: `list`
+- Element_Names: `space/reach`: as specified by the `Reaches` output
+- Geometries: `space/reach`: as specified by output itself
 ## Roadmap
 
 The following changes will be part of future `StepsRiverNetwork` versions:

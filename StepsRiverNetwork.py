@@ -18,6 +18,7 @@ class StepsRiverNetwork(base.Component):
     """
     # RELEASES
     VERSION = base.VersionCollection(
+        base.VersionInfo("2.1.8", "2023-09-20"),
         base.VersionInfo("2.1.7", "2023-09-18"),
         base.VersionInfo("2.1.6", "2023-09-13"),
         base.VersionInfo("2.1.5", "2023-09-12"),
@@ -132,6 +133,8 @@ class StepsRiverNetwork(base.Component):
     VERSION.changed("2.1.7", "Updated component description")
     VERSION.changed("2.1.7", "Updated input descriptions and removed stub descriptions")
     VERSION.added("2.1.7", "Runtime warnings and notes regarding status of component and documentation")
+    VERSION.added("2.1.8", "Extended output descriptions")
+    VERSION.added("2.1.8", "Outputs with scale `space/reach` report geometries")
 
     def __init__(self, name, observer, store):
         """
