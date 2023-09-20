@@ -18,6 +18,7 @@ class StepsRiverNetwork(base.Component):
     """
     # RELEASES
     VERSION = base.VersionCollection(
+        base.VersionInfo("2.1.8", "2023-09-20"),
         base.VersionInfo("2.1.7", "2023-09-18"),
         base.VersionInfo("2.1.6", "2023-09-13"),
         base.VersionInfo("2.1.5", "2023-09-12"),
@@ -132,6 +133,8 @@ class StepsRiverNetwork(base.Component):
     VERSION.changed("2.1.7", "Updated component description")
     VERSION.changed("2.1.7", "Updated input descriptions and removed stub descriptions")
     VERSION.added("2.1.7", "Runtime warnings and notes regarding status of component and documentation")
+    VERSION.added("2.1.8", "Extended output descriptions")
+    VERSION.added("2.1.8", "Outputs with scale `space/reach` report geometries")
 
     def __init__(self, name, observer, store):
         """
@@ -319,7 +322,10 @@ class StepsRiverNetwork(base.Component):
                     "type": np.ndarray,
                     "shape": ("the number of simulated hours", "the number of simulated reaches"),
                     "chunks": "for fast retrieval of time series",
-                    "unit": "mg/m³"
+                    "unit": "mg/m³",
+                    "element_names": (None, "as specified by the `Reaches` output"),
+                    "offset": ("the value of the `TimeSeriesStart` input", None),
+                    "geometries": (None, "as specified by the `ReachesGeometries` output")
                 }
             ),
             base.Output(
@@ -332,7 +338,10 @@ class StepsRiverNetwork(base.Component):
                     "type": np.ndarray,
                     "shape": ("the number of simulated hours", "the number of simulated reaches"),
                     "chunks": "for fast retrieval of time series",
-                    "unit": "mg"
+                    "unit": "mg",
+                    "element_names": (None, "as specified by the `Reaches` output"),
+                    "offset": ("the value of the `TimeSeriesStart` input", None),
+                    "geometries": (None, "as specified by the `ReachesGeometries` output")
                 }
             ),
             base.Output(
@@ -345,7 +354,10 @@ class StepsRiverNetwork(base.Component):
                     "type": np.ndarray,
                     "shape": ("the number of simulated hours", "the number of simulated reaches"),
                     "chunks": "for fast retrieval of time series",
-                    "unit": "mg"
+                    "unit": "mg",
+                    "element_names": (None, "as specified by the `Reaches` output"),
+                    "offset": ("the value of the `TimeSeriesStart` input", None),
+                    "geometries": (None, "as specified by the `ReachesGeometries` output")
                 }
             ),
             base.Output(
@@ -358,7 +370,10 @@ class StepsRiverNetwork(base.Component):
                     "type": np.ndarray,
                     "shape": ("the number of simulated hours", "the number of simulated reaches"),
                     "chunks": "for fast retrieval of time series",
-                    "unit": "mg"
+                    "unit": "mg",
+                    "element_names": (None, "as specified by the `Reaches` output"),
+                    "offset": ("the value of the `TimeSeriesStart` input", None),
+                    "geometries": (None, "as specified by the `ReachesGeometries` output")
                 }
             ),
             base.Output(
@@ -371,7 +386,10 @@ class StepsRiverNetwork(base.Component):
                     "type": np.ndarray,
                     "shape": ("the number of simulated hours", "the number of simulated reaches"),
                     "chunks": "for fast retrieval of time series",
-                    "unit": "mg/m³"
+                    "unit": "mg/m³",
+                    "element_names": (None, "as specified by the `Reaches` output"),
+                    "offset": ("the value of the `TimeSeriesStart` input", None),
+                    "geometries": (None, "as specified by the `ReachesGeometries` output")
                 }
             ),
             base.Output(
@@ -380,7 +398,24 @@ class StepsRiverNetwork(base.Component):
                 self,
                 {"scales": "space/reach"},
                 "The numerical identifiers of the reaches in the order of the other outputs.",
-                {"type": "list[int]"}
+                {
+                    "type": list[int],
+                    "element_names": ("as specified by the output itself",),
+                    "geometries": ("as specified by the `ReachesGeometries` output",)
+                }
+            ),
+            base.Output(
+                "ReachesGeometries",
+                store,
+                self,
+                {"scales": "space/reach"},
+                "The geometry of the reaches in Well-Known-Byte notation in the order of the reaches as specified by "
+                "the `Reaches` output.",
+                {
+                    "type": list[bytes],
+                    "element_names": ("as specified by the `Reaches` output",),
+                    "geometries": ("as specified by output itself",)
+                }
             )
         ])
         self._begin = None
@@ -504,7 +539,14 @@ class StepsRiverNetwork(base.Component):
         organic_contents = self.inputs["OrganicContent"].read().values
         depths_sediment_1 = self.inputs["SedimentDepth1stLayer"].read().values
         depths_sediment_2 = self.inputs["SedimentDepth2ndLayer"].read().values
-        self.outputs["Reaches"].set_values(reaches_sorted, element_names=(self.outputs["Reaches"],))
+        geometries_sorted = [hydrography_geometries.values[hydrography_reaches.index(x)] for x in reaches_sorted]
+        self.outputs["Reaches"].set_values(
+            reaches_sorted, element_names=(self.outputs["Reaches"],), geometries=(self.outputs["ReachesGeometries"],))
+        self.outputs["ReachesGeometries"].set_values(
+            geometries_sorted,
+            element_names=(self.outputs["Reaches"],),
+            geometries=(self.outputs["ReachesGeometries"],)
+        )
         with open(reach_list_file, "w") as f:
             # noinspection SpellCheckingInspection
             f.write(
@@ -638,7 +680,8 @@ class StepsRiverNetwork(base.Component):
                     chunks=(min(262144, data.shape[0]), 1),
                     unit=variable[1],
                     element_names=(None, self.outputs["Reaches"]),
-                    offset=(self._begin, None)
+                    offset=(self._begin, None),
+                    geometries=(None, self.outputs["ReachesGeometries"])
                 )
                 for chunk in base.chunk_slices(data.shape, (min(262144, data.shape[0]), 1)):
                     self.outputs[variable[0]].set_values(data[chunk], slices=chunk, create=False, calculate_max=True)
