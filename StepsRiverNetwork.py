@@ -540,8 +540,7 @@ class StepsRiverNetwork(base.Component):
         depths_sediment_1 = self.inputs["SedimentDepth1stLayer"].read().values
         depths_sediment_2 = self.inputs["SedimentDepth2ndLayer"].read().values
         geometries_sorted = [hydrography_geometries.values[hydrography_reaches.index(x)] for x in reaches_sorted]
-        self.outputs["Reaches"].set_values(
-            reaches_sorted, element_names=(self.outputs["Reaches"],), geometries=(self.outputs["ReachesGeometries"],))
+        self.outputs["Reaches"].set_values(reaches_sorted, element_names=(self.outputs["Reaches"],))
         self.outputs["ReachesGeometries"].set_values(
             geometries_sorted,
             element_names=(self.outputs["Reaches"],),
