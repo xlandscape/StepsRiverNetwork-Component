@@ -629,7 +629,7 @@ class StepsRiverNetwork(base.Component):
             (python_exe, python_script, "--folder", processing_path, "--runlist", project_name),
             processing_path,
             self.default_observer,
-            {"HOMEPATH": processing_path}
+            {"HOMEPATH": processing_path, "WINDIR": os.environ["WINDIR"]}
         )
 
     # noinspection DuplicatedCode
